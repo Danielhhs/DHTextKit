@@ -15,6 +15,11 @@
 		5412F3E01ED2E9B100739A5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5412F3DE1ED2E9B100739A5C /* LaunchScreen.storyboard */; };
 		5412F3EB1ED2E9B100739A5C /* DHTextKitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5412F3EA1ED2E9B100739A5C /* DHTextKitTests.m */; };
 		5412F3F61ED2E9B100739A5C /* DHTextKitUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5412F3F51ED2E9B100739A5C /* DHTextKitUITests.m */; };
+		5412F4061ED2EA1A00739A5C /* DHLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 5412F4051ED2EA1A00739A5C /* DHLabel.m */; };
+		5472D5AB1ED3E30E0094ED87 /* DHTextLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 5472D5AA1ED3E30E0094ED87 /* DHTextLayout.m */; };
+		5472D5AE1ED3E6440094ED87 /* DHTextLine.m in Sources */ = {isa = PBXBuildFile; fileRef = 5472D5AD1ED3E6440094ED87 /* DHTextLine.m */; };
+		5472D5B11ED40D480094ED87 /* DHTextAttachment.m in Sources */ = {isa = PBXBuildFile; fileRef = 5472D5B01ED40D480094ED87 /* DHTextAttachment.m */; };
+		5472D5B41ED40F070094ED87 /* DHTextContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5472D5B31ED40F070094ED87 /* DHTextContainer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +56,16 @@
 		5412F3F11ED2E9B100739A5C /* DHTextKitUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DHTextKitUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5412F3F51ED2E9B100739A5C /* DHTextKitUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DHTextKitUITests.m; sourceTree = "<group>"; };
 		5412F3F71ED2E9B100739A5C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5412F4041ED2EA1A00739A5C /* DHLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DHLabel.h; sourceTree = "<group>"; };
+		5412F4051ED2EA1A00739A5C /* DHLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DHLabel.m; sourceTree = "<group>"; };
+		5472D5A91ED3E30E0094ED87 /* DHTextLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DHTextLayout.h; sourceTree = "<group>"; };
+		5472D5AA1ED3E30E0094ED87 /* DHTextLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DHTextLayout.m; sourceTree = "<group>"; };
+		5472D5AC1ED3E6440094ED87 /* DHTextLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DHTextLine.h; sourceTree = "<group>"; };
+		5472D5AD1ED3E6440094ED87 /* DHTextLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DHTextLine.m; sourceTree = "<group>"; };
+		5472D5AF1ED40D480094ED87 /* DHTextAttachment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DHTextAttachment.h; sourceTree = "<group>"; };
+		5472D5B01ED40D480094ED87 /* DHTextAttachment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DHTextAttachment.m; sourceTree = "<group>"; };
+		5472D5B21ED40F070094ED87 /* DHTextContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DHTextContainer.h; sourceTree = "<group>"; };
+		5472D5B31ED40F070094ED87 /* DHTextContainer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DHTextContainer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +120,7 @@
 				5412F3D41ED2E9B100739A5C /* AppDelegate.m */,
 				5412F3D61ED2E9B100739A5C /* ViewController.h */,
 				5412F3D71ED2E9B100739A5C /* ViewController.m */,
+				5412F4031ED2EA0700739A5C /* DHTextKit */,
 				5412F3D91ED2E9B100739A5C /* Main.storyboard */,
 				5412F3DC1ED2E9B100739A5C /* Assets.xcassets */,
 				5412F3DE1ED2E9B100739A5C /* LaunchScreen.storyboard */,
@@ -138,6 +154,23 @@
 				5412F3F71ED2E9B100739A5C /* Info.plist */,
 			);
 			path = DHTextKitUITests;
+			sourceTree = "<group>";
+		};
+		5412F4031ED2EA0700739A5C /* DHTextKit */ = {
+			isa = PBXGroup;
+			children = (
+				5412F4041ED2EA1A00739A5C /* DHLabel.h */,
+				5412F4051ED2EA1A00739A5C /* DHLabel.m */,
+				5472D5A91ED3E30E0094ED87 /* DHTextLayout.h */,
+				5472D5AA1ED3E30E0094ED87 /* DHTextLayout.m */,
+				5472D5B21ED40F070094ED87 /* DHTextContainer.h */,
+				5472D5B31ED40F070094ED87 /* DHTextContainer.m */,
+				5472D5AC1ED3E6440094ED87 /* DHTextLine.h */,
+				5472D5AD1ED3E6440094ED87 /* DHTextLine.m */,
+				5472D5AF1ED40D480094ED87 /* DHTextAttachment.h */,
+				5472D5B01ED40D480094ED87 /* DHTextAttachment.m */,
+			);
+			path = DHTextKit;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -276,8 +309,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5472D5B41ED40F070094ED87 /* DHTextContainer.m in Sources */,
+				5412F4061ED2EA1A00739A5C /* DHLabel.m in Sources */,
+				5472D5B11ED40D480094ED87 /* DHTextAttachment.m in Sources */,
 				5412F3D81ED2E9B100739A5C /* ViewController.m in Sources */,
 				5412F3D51ED2E9B100739A5C /* AppDelegate.m in Sources */,
+				5472D5AB1ED3E30E0094ED87 /* DHTextLayout.m in Sources */,
+				5472D5AE1ED3E6440094ED87 /* DHTextLine.m in Sources */,
 				5412F3D21ED2E9B100739A5C /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -516,6 +554,7 @@
 				5412F3FC1ED2E9B100739A5C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5412F3FD1ED2E9B100739A5C /* Build configuration list for PBXNativeTarget "DHTextKitTests" */ = {
 			isa = XCConfigurationList;
@@ -524,6 +563,7 @@
 				5412F3FF1ED2E9B100739A5C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5412F4001ED2E9B100739A5C /* Build configuration list for PBXNativeTarget "DHTextKitUITests" */ = {
 			isa = XCConfigurationList;
@@ -532,6 +572,7 @@
 				5412F4021ED2E9B100739A5C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
