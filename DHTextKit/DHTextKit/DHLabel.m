@@ -8,24 +8,20 @@
 
 #import "DHLabel.h"
 #import <CoreText/CoreText.h>
-
+#import "DHTextLayout.h"
 @interface DHLabel ()
-
+@property (nonatomic, strong) DHTextLayout *layout;
 @end
 
 @implementation DHLabel
 
 - (void)drawRect:(CGRect)rect {
-    NSAttributedString *attrString = [self attributedStringToDraw];
-    CGPathRef path = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
-    CTFramesetterRef frameSetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)attrString);
-    CTFrameRef frame = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, [attrString length]), path, NULL);
-    CFArrayRef lines = CTFrameGetLines(frame);
-    CFIndex numberOfLines = CFArrayGetCount(lines);
-    for (CFIndex i = 0; i < numberOfLines; i++) {
-        CTLineRef line = CFArrayGetValueAtIndex(lines, i);
-    
-    }
+    [self.layout drawInContext:UIGraphicsGetCurrentContext()
+                          size:self.bounds.size
+                         point:CGPointZero
+                          view:self
+                         layer:nil
+                        cancel:nil];
 }
 
 - (NSAttributedString *) attributedStringToDraw
@@ -34,6 +30,9 @@
         return self.attribtuedText;
     } else {
         NSDictionary *attributes = [self textAttributes];
+        if (self.text == nil) {
+            return nil;
+        }
         NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:self.text
                                                                       attributes:attributes];
         return attrStr;
@@ -46,6 +45,27 @@
     UIColor *textColor = (self.textColor != nil) ? self.textColor : [UIColor blackColor];
     return @{NSFontAttributeName : font,
              NSForegroundColorAttributeName : textColor};
+}
+
+- (void) setAttribtuedText:(NSAttributedString *)attribtuedText
+{
+    _attribtuedText = attribtuedText;
+    self.layout = [DHTextLayout layoutWithContainerSize:self.bounds.size text:attribtuedText];
+    [self setNeedsDisplay];
+}
+
+- (void) setBounds:(CGRect)bounds
+{
+    [super setBounds:bounds];
+    self.layout = [DHTextLayout layoutWithContainerSize:self.bounds.size text:[self attributedStringToDraw]];
+    [self setNeedsDisplay];
+}
+
+- (void) setFrame:(CGRect)frame
+{
+    [super setFrame:frame];
+    self.layout = [DHTextLayout layoutWithContainerSize:self.bounds.size text:[self attributedStringToDraw]];
+    [self setNeedsDisplay];
 }
 
 @end

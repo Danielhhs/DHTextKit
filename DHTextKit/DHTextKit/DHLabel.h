@@ -17,5 +17,7 @@
 @property (nonatomic, strong) UIColor *textColor;
 @property (nonatomic, strong) UIColor *strokeColor;
 @property (nonatomic, strong) UIColor *fillColor;
+@property (nonatomic, strong) UIColor *shadowColor;
+@property (nonatomic) CGFloat shadowOffset;
 
 @end

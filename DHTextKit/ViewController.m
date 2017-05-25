@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "DHLabel.h"
 
 @interface ViewController ()
 
@@ -16,6 +17,14 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    DHLabel *label = [[DHLabel alloc] initWithFrame:CGRectMake(100, 100, 200, 100)];
+    UIFont *font = [UIFont systemFontOfSize:15];
+    UIColor *color = [UIColor redColor];
+    NSDictionary *attributes = @{NSFontAttributeName : font,
+                                 NSForegroundColorAttributeName : color};
+    NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:@"Any thing you want to saya \n and whatever you want to a work" attributes:attributes];
+    label.attribtuedText = attrStr;
+    [self.view addSubview:label];
     // Do any additional setup after loading the view, typically from a nib.
 }
 
