@@ -49,6 +49,7 @@
 - (void) setLineSpacing:(nullable NSNumber *)lineSpacing forRange:(NSRange)range;
 - (void) setParagraphSpacing:(nullable NSNumber *)paragraphSpacing forRange:(NSRange)range;
 - (void) setRunDelegate:(nullable CTRunDelegateRef)runDelegate forRange:(NSRange)range;
-- (void) setAttachment:(nullable DHTextAttachment *)attachment forRange:(NSRange)range;
+- (void) setAttachment:(nullable NSTextAttachment *)attachment forRange:(NSRange)range;
+- (void) setTextAttachment:(nullable DHTextAttachment *)textAttachment forRange:(NSRange)range;
 
 @end

@@ -135,7 +135,7 @@
             runWidth = CTRunGetTypographicBounds(run, [DHTextUtils emptyCFRange], &ascent, &descent, &leading);
             
             runPosition.x += _position.x;
-            runPosition.y = _position.y - runPosition.y;
+            runPosition.y = self.bounds.origin.y - runPosition.y;
             
             runTypoBounds = CGRectMake(runPosition.x, runPosition.y, runWidth, ascent + descent);
             
@@ -151,13 +151,14 @@
 }
 
 #pragma mark - Drawing
-
-
 - (void) drawInContext:(CGContextRef)context
                   size:(CGSize)size
               position:(CGPoint)position
+                inView:(UIView *)view
+               orLayer:(CALayer *)layer
 {
     [self drawTextInContext:context size:size position:position];
+    [self drawAttachmentsInContext:context size:size position:position inView:view orLayer:layer];
 }
 
 - (void) drawTextInContext:(CGContextRef)context
@@ -174,6 +175,60 @@
         CGContextSetTextMatrix(NULL, CGAffineTransformIdentity);
         CGContextSetTextPosition(context, lineOrigin.x, size.height - lineOrigin.y);
         CTRunDraw(run, context, [DHTextUtils emptyCFRange]);
+    }
+}
+
+- (void) drawAttachmentsInContext:(CGContextRef)context
+                             size:(CGSize)size
+                         position:(CGPoint)position
+                           inView:(UIView *)targetView
+                          orLayer:(CALayer *)targetLayer
+{
+    for (NSInteger i = 0; i < [self.attachments count]; i++) {
+        DHTextAttachment *attachment = self.attachments[i];
+        if (attachment.content == nil) {
+            return;
+        }
+        
+        UIView *view = nil;
+        UIImage *image = nil;
+        CALayer *layer = nil;
+        if ([attachment.content isKindOfClass:[UIImage class]]) {
+            image = (UIImage *)attachment.content;
+        } else if ([attachment.content isKindOfClass:[UIView class]]) {
+            view = (UIView *)attachment.content;
+        } else if ([attachment.content isKindOfClass:[CALayer class]]) {
+            layer = (CALayer *)attachment.content;
+        }
+        
+        if (!image && !view && !layer) continue;
+        if (image && !context) continue;
+        if (view && !targetView) continue;
+        if (layer && !targetLayer) continue;
+        
+//        CGSize size = image ? image.size : view ? view.frame.size : layer.frame.size;
+        CGRect rect = [((NSValue *)self.attachmentRects[i]) CGRectValue];
+        rect = UIEdgeInsetsInsetRect(rect, attachment.contentInsets);
+        rect = CGRectStandardize(rect);
+        rect.origin.x += position.x;
+        rect.origin.y += position.y;
+        
+        if (image) {
+            CGImageRef imageRef = image.CGImage;
+            if (imageRef) {
+                CGContextSaveGState(context);
+                CGContextTranslateCTM(context, 0, size.height);   //minY: move to the rect system, maxY: flip around;
+                CGContextScaleCTM(context, 1, -1);
+                CGContextDrawImage(context, rect, imageRef);
+                CGContextRestoreGState(context);
+            }
+        } else if (view) {
+            view.frame = rect;
+            [targetView addSubview:view];
+        } else if (layer) {
+            layer.frame = rect;
+            [targetLayer addSublayer:layer];
+        }
     }
 }
 @end

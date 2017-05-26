@@ -23,8 +23,10 @@
     UIColor *color = [UIColor redColor];
     NSDictionary *attributes = @{NSFontAttributeName : font,
                                  NSForegroundColorAttributeName : color};
-    NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:@"Any thing you want to saya" attributes:attributes];
-    NSAttributedString *attachment = [NSAttributedString dh_attachmentStringWithContent:[UIImage imageNamed:@"Delete.png"] contentMode:UIViewContentModeScaleToFill attachmentSize:CGSizeMake(50, 50) alignToFont:font verticalAlignment:DHTextVerticalAlignmentTop];
+    NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:@"Any" attributes:attributes];
+    NSAttributedString *attachment = [NSAttributedString dh_attachmentStringWithContent:[UIImage imageNamed:@"Delete.png"] contentMode:UIViewContentModeScaleToFill attachmentSize:CGSizeMake(15, 30) alignToFont:font verticalAlignment:DHTextVerticalAlignmentTop];
+    NSAttributedString *tail = [[NSAttributedString alloc] initWithString:@"thing you want to sayladjlasdlasd" attributes:attributes];
+    [attrStr appendAttributedString:tail];
     [attrStr appendAttributedString:attachment];
     label.attribtuedText = attrStr;
     [self.view addSubview:label];

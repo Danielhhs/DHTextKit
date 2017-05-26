@@ -17,7 +17,9 @@
 
 - (void) drawInContext:(CGContextRef)context
                   size:(CGSize)size
-              position:(CGPoint)position;
+              position:(CGPoint)position
+                inView:(UIView *)view
+               orLayer:(CALayer *)layer;
 
 @property (nonatomic) CGPoint position;     //BaseLine position
 

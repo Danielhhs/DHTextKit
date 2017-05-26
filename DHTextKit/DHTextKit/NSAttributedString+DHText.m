@@ -21,7 +21,7 @@
     DHTextAttachment *attachment = [[DHTextAttachment alloc] init];
     attachment.content = content;
     attachment.contentMode = contentMode;
-    [attrStr setAttachment:attachment forRange:NSMakeRange(0, [attrStr length])];
+    [attrStr setTextAttachment:attachment forRange:NSMakeRange(0, [attrStr length])];
     
     DHTextRunDelegate *runDelegate = [[DHTextRunDelegate alloc] init];
     runDelegate.width = width;
@@ -42,7 +42,7 @@
     DHTextAttachment *attachment = [[DHTextAttachment alloc] init];
     attachment.content = content;
     attachment.contentMode = contentMode;
-    [attrStr setAttachment:attachment forRange:NSMakeRange(0, [attrStr length])];
+    [attrStr setTextAttachment:attachment forRange:NSMakeRange(0, [attrStr length])];
     
     DHTextRunDelegate *runDelegate = [[DHTextRunDelegate alloc] init];
     runDelegate.width = size.width;
@@ -185,9 +185,14 @@
     [self setAttribute:(id)kCTRunDelegateAttributeName value:(__bridge id)runDelegate range:range];
 }
 
-- (void) setAttachment:(DHTextAttachment *)attachment forRange:(NSRange)range
+- (void) setAttachment:(NSTextAttachment *)attachment forRange:(NSRange)range
 {
     [self setAttribute:NSAttachmentAttributeName value:attachment range:range];
+}
+
+- (void) setTextAttachment:(DHTextAttachment *)textAttachment forRange:(NSRange)range
+{
+    [self setAttribute:DHTextAttachmentAttributeName value:textAttachment range:range];
 }
 
 @end

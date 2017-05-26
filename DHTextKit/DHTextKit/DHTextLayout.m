@@ -65,7 +65,7 @@
         //Translate lineOrigin to UIKit Coordinate system
         CGPoint position;
         position.x = pathBox.origin.x + lineOrigin.x;
-        position.y = pathBox.origin.y + pathBox.size.height -lineOrigin.y;
+        position.y = pathBox.origin.y + pathBox.size.height - lineOrigin.y;
         DHTextLine *line = [DHTextLine lineWithCTLine:ctLine position:position];
         [lines addObject:line];
     }
@@ -96,18 +96,16 @@
     CGContextTranslateCTM(context, point.x, point.y);
     CGContextTranslateCTM(context, 0, size.height);
     CGContextScaleCTM(context, 1, -1);
-    [self drawTextInContext:context size:size point:point];
-//    [self drawAttachmentsInContext:context size:size point:point inView:view orLayer:layer];
+    for (int i = 0; i < [self.lines count]; i++) {
+        DHTextLine *line = self.lines[i];
+        [line drawInContext:context size:size position:point inView:view orLayer:layer];
+    }
 }
 
 - (void) drawTextInContext:(CGContextRef)context
                       size:(CGSize)size
                      point:(CGPoint)point
 {
-    for (int i = 0; i < [self.lines count]; i++) {
-        DHTextLine *line = self.lines[i];
-        [line drawInContext:context size:size position:point];
-    }
 }
 
 - (void) drawAttachmentsInContext:(CGContextRef)context
