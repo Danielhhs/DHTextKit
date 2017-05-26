@@ -15,6 +15,9 @@
 @property (nonatomic, readwrite) NSRange range;
 @property (nonatomic, readwrite) CTFramesetterRef frameSetter;
 @property (nonatomic, readwrite) CTFrameRef frame;
+@property (nonatomic, strong, readwrite) NSArray<DHTextAttachment *> *attachments;
+@property (nonatomic, strong, readwrite) NSArray<NSValue *> *attachmentRanges;
+@property (nonatomic, strong, readwrite) NSArray<NSValue *> *attachmentRects;
 @end
 
 @implementation DHTextLayout
@@ -47,6 +50,7 @@
 - (void) setup
 {
     CGPathRef path = [self pathForRendering];
+    CGRect pathBox = CGPathGetBoundingBox(path);
     self.frameSetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)self.text);
     self.frame = CTFramesetterCreateFrame(self.frameSetter, CFRangeMake(self.range.location, self.range.length), path, NULL);
     CFArrayRef ctLines = CTFrameGetLines(self.frame);
@@ -57,7 +61,12 @@
     for (CFIndex lineNo = 0; lineNo < numberOfLines; lineNo++) {
         CTLineRef ctLine = CFArrayGetValueAtIndex(ctLines, lineNo);
         CGPoint lineOrigin = lineOrigins[lineNo];
-        DHTextLine *line = [DHTextLine lineWithCTLine:ctLine position:lineOrigin];
+        
+        //Translate lineOrigin to UIKit Coordinate system
+        CGPoint position;
+        position.x = pathBox.origin.x + lineOrigin.x;
+        position.y = pathBox.origin.y + pathBox.size.height -lineOrigin.y;
+        DHTextLine *line = [DHTextLine lineWithCTLine:ctLine position:position];
         [lines addObject:line];
     }
     self.lines = [lines copy];
@@ -87,9 +96,28 @@
     CGContextTranslateCTM(context, point.x, point.y);
     CGContextTranslateCTM(context, 0, size.height);
     CGContextScaleCTM(context, 1, -1);
+    [self drawTextInContext:context size:size point:point];
+//    [self drawAttachmentsInContext:context size:size point:point inView:view orLayer:layer];
+}
+
+- (void) drawTextInContext:(CGContextRef)context
+                      size:(CGSize)size
+                     point:(CGPoint)point
+{
     for (int i = 0; i < [self.lines count]; i++) {
         DHTextLine *line = self.lines[i];
         [line drawInContext:context size:size position:point];
+    }
+}
+
+- (void) drawAttachmentsInContext:(CGContextRef)context
+                             size:(CGSize)size
+                            point:(CGPoint)point
+                           inView:(UIView *)view
+                          orLayer:(CALayer *)layer
+{
+    for (int i = 0; i < [self.attachments count]; i++) {
+        
     }
 }
 

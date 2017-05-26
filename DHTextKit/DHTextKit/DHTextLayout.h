@@ -11,6 +11,7 @@
 #import <UIKit/UIKit.h>
 #import "DHTextLine.h"
 #import "DHTextContainer.h"
+#import "DHTextAttachment.h"
 
 @interface DHTextLayout : NSObject
 

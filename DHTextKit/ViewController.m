@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "DHLabel.h"
+#import "NSAttributedString+DHText.h"
 
 @interface ViewController ()
 
@@ -22,7 +23,9 @@
     UIColor *color = [UIColor redColor];
     NSDictionary *attributes = @{NSFontAttributeName : font,
                                  NSForegroundColorAttributeName : color};
-    NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:@"Any thing you want to saya \n and whatever you want to a work" attributes:attributes];
+    NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:@"Any thing you want to saya" attributes:attributes];
+    NSAttributedString *attachment = [NSAttributedString dh_attachmentStringWithContent:[UIImage imageNamed:@"Delete.png"] contentMode:UIViewContentModeScaleToFill attachmentSize:CGSizeMake(50, 50) alignToFont:font verticalAlignment:DHTextVerticalAlignmentTop];
+    [attrStr appendAttributedString:attachment];
     label.attribtuedText = attrStr;
     [self.view addSubview:label];
     // Do any additional setup after loading the view, typically from a nib.
