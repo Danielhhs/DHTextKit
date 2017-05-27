@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "DHTextAttribute.h"
 
 @interface DHTextContainer : NSObject
 
@@ -21,5 +22,7 @@
 @property (nonatomic, readonly) CGSize size;
 @property (nonatomic, readonly) UIEdgeInsets insets;
 @property (nonatomic, strong, readonly, nullable) UIBezierPath *path;
+@property (nonatomic) DHTextTruncationType truncationType;
+@property (nonatomic, strong, nullable) NSAttributedString *truncationToken;    //Truncation place holder, if nil, use "..."
 
 @end

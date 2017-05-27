@@ -25,8 +25,8 @@
 
 @property (nonatomic, readonly) CTLineRef ctLine;
 @property (nonatomic, readonly) NSRange range;
-@property (nonatomic, readonly) NSUInteger index;
-@property (nonatomic, readonly) NSUInteger row;
+@property (nonatomic) NSUInteger index;
+@property (nonatomic) NSUInteger row;
 @property (nonatomic, readonly) CGRect bounds;
 @property (nonatomic, readonly) CGSize size;
 @property (nonatomic, readonly) CGFloat width;

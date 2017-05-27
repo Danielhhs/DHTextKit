@@ -27,6 +27,7 @@
 
 @property (nonatomic, strong, readonly, nullable) NSArray <DHTextLine *> *lines;
 @property (nonatomic, readonly) CGRect textBoundingRect;
+@property (nonatomic, ) NSInteger maximumNumberOfRows;
 
 - (void) drawInContext:(nullable CGContextRef)context
                   size:(CGSize)size

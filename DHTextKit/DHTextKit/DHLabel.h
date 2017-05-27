@@ -19,6 +19,7 @@
 @property (nonatomic, strong) UIColor *fillColor;
 @property (nonatomic, strong) UIColor *shadowColor;
 @property (nonatomic) CGFloat shadowOffset;
+@property (nonatomic) NSInteger maximumNumberOfRows;
 
 + (CGRect) textBoundingRectForAttributedString:(NSAttributedString *)attributedString
                                       maxWidth:(CGFloat)width;

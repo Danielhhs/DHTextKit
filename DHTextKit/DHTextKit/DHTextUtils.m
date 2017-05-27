@@ -30,4 +30,30 @@
     return NSMakeRange(0, 0);
 }
 
++ (CTLineTruncationType) ctLineTruncationTypeFromDHTurncationType:(DHTextTruncationType)dhTruncationType
+{
+    switch (dhTruncationType) {
+        case DHTextTruncationTypeStart:
+            return kCTLineTruncationStart;
+        case DHTextTruncationTypeEnd:
+            return kCTLineTruncationEnd;
+        case DHTextTruncationTypeMiddle:
+            return kCTLineTruncationMiddle;
+        default:
+            return kCTLineTruncationStart;
+    }
+}
+
++ (DHTextTruncationType) dhTruncationTypeFromCTLineTruncationType:(CTLineTruncationType)ctTruncationType
+{
+    switch (ctTruncationType) {
+        case kCTLineTruncationStart:
+            return DHTextTruncationTypeStart;
+        case kCTLineTruncationMiddle:
+            return DHTextTruncationTypeMiddle;
+        case kCTLineTruncationEnd:
+            return DHTextTruncationTypeEnd;
+    }
+}
+
 @end

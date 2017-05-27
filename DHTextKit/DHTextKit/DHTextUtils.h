@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreText/CoreText.h>
+#import "DHTextAttribute.h"
 @interface DHTextUtils : NSObject
 
 + (NSRange) NSRangeFromCFRange:(CFRange)cfRange;
@@ -16,4 +17,6 @@
 + (NSRange) emptyNSRange;
 + (CFRange) emptyCFRange;
 
++ (CTLineTruncationType) ctLineTruncationTypeFromDHTurncationType:(DHTextTruncationType)dhTruncationType;
++ (DHTextTruncationType) dhTruncationTypeFromCTLineTruncationType:(CTLineTruncationType)ctTruncationType;
 @end

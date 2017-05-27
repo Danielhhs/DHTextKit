@@ -11,11 +11,11 @@
 #import "DHTextAttribute.h"
 @interface DHTextAttribute : NSObject
 
-typedef NS_ENUM(NSInteger, DHTextTruncateType) {
-    DHTextTruncateTypeNone = 0,
-    DHTextTruncateTypeStart = 1,    //show the end
-    DHTextTruncateTypeEnd = 2,      //show the start
-    DHTextTruncateTypeMiddle = 3,   //show the middle
+typedef NS_ENUM(NSInteger, DHTextTruncationType) {
+    DHTextTruncationTypeNone = 0,
+    DHTextTruncationTypeStart = 1,    //show the end
+    DHTextTruncationTypeEnd = 2,      //show the start
+    DHTextTruncationTypeMiddle = 3,   //show the middle
 };
 
 typedef NS_ENUM(NSInteger, DHTextVerticalAlignment) {

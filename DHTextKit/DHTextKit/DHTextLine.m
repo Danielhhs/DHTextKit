@@ -16,8 +16,6 @@
 }
 @property (nonatomic, readwrite) CTLineRef ctLine;
 @property (nonatomic, readwrite) NSRange range;
-@property (nonatomic, readwrite) NSUInteger index;
-@property (nonatomic, readwrite) NSUInteger row;
 @property (nonatomic, readwrite) CGRect bounds;
 @property (nonatomic, readwrite) CGSize size;
 @property (nonatomic, readwrite) CGFloat width;
