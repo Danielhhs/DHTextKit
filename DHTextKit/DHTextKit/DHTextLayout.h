@@ -26,6 +26,7 @@
                                  range:(NSRange)range;
 
 @property (nonatomic, strong, readonly, nullable) NSArray <DHTextLine *> *lines;
+@property (nonatomic, readonly) CGRect textBoundingRect;
 
 - (void) drawInContext:(nullable CGContextRef)context
                   size:(CGSize)size

@@ -24,11 +24,16 @@
     NSDictionary *attributes = @{NSFontAttributeName : font,
                                  NSForegroundColorAttributeName : color};
     NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:@"Any" attributes:attributes];
-    NSAttributedString *attachment = [NSAttributedString dh_attachmentStringWithContent:[UIImage imageNamed:@"Delete.png"] contentMode:UIViewContentModeScaleToFill attachmentSize:CGSizeMake(15, 30) alignToFont:font verticalAlignment:DHTextVerticalAlignmentTop];
+    NSAttributedString *attachment = [NSAttributedString dh_attachmentStringWithContent:[UIImage imageNamed:@"Delete.png"]
+                                                                            contentMode:UIViewContentModeScaleToFill
+                                                                         attachmentSize:CGSizeMake(15, 30)
+                                                                            alignToFont:font
+                                                                      verticalAlignment:DHTextVerticalAlignmentBottom];
     NSAttributedString *tail = [[NSAttributedString alloc] initWithString:@"thing you want to sayladjlasdlasd" attributes:attributes];
     [attrStr appendAttributedString:tail];
     [attrStr appendAttributedString:attachment];
     label.attribtuedText = attrStr;
+    [label sizeToFit];
     [self.view addSubview:label];
     // Do any additional setup after loading the view, typically from a nib.
 }

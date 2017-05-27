@@ -157,8 +157,16 @@
                 inView:(UIView *)view
                orLayer:(CALayer *)layer
 {
+    [self drawShadowInContext:context size:size position:position];
     [self drawTextInContext:context size:size position:position];
     [self drawAttachmentsInContext:context size:size position:position inView:view orLayer:layer];
+}
+
+- (void) drawShadowInContext:(CGContextRef)context
+                        size:(CGSize)size
+                    position:(CGPoint)position
+{
+    
 }
 
 - (void) drawTextInContext:(CGContextRef)context
@@ -206,7 +214,6 @@
         if (view && !targetView) continue;
         if (layer && !targetLayer) continue;
         
-//        CGSize size = image ? image.size : view ? view.frame.size : layer.frame.size;
         CGRect rect = [((NSValue *)self.attachmentRects[i]) CGRectValue];
         rect = UIEdgeInsetsInsetRect(rect, attachment.contentInsets);
         rect = CGRectStandardize(rect);

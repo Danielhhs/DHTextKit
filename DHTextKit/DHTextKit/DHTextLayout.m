@@ -18,6 +18,7 @@
 @property (nonatomic, strong, readwrite) NSArray<DHTextAttachment *> *attachments;
 @property (nonatomic, strong, readwrite) NSArray<NSValue *> *attachmentRanges;
 @property (nonatomic, strong, readwrite) NSArray<NSValue *> *attachmentRects;
+@property (nonatomic, readwrite) CGRect textBoundingRect;
 @end
 
 @implementation DHTextLayout
@@ -58,6 +59,7 @@
     NSMutableArray *lines = [NSMutableArray array];
     CGPoint *lineOrigins = malloc(sizeof(CGPoint) * numberOfLines);
     CTFrameGetLineOrigins(self.frame, CFRangeMake(0, numberOfLines), lineOrigins);
+    CGRect boundingRect = CGRectZero;
     for (CFIndex lineNo = 0; lineNo < numberOfLines; lineNo++) {
         CTLineRef ctLine = CFArrayGetValueAtIndex(ctLines, lineNo);
         CGPoint lineOrigin = lineOrigins[lineNo];
@@ -68,7 +70,9 @@
         position.y = pathBox.origin.y + pathBox.size.height - lineOrigin.y;
         DHTextLine *line = [DHTextLine lineWithCTLine:ctLine position:position];
         [lines addObject:line];
+        boundingRect = CGRectUnion(boundingRect, line.bounds);
     }
+    self.textBoundingRect = boundingRect;
     self.lines = [lines copy];
 }
 

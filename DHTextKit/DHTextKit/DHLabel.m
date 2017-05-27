@@ -9,6 +9,9 @@
 #import "DHLabel.h"
 #import <CoreText/CoreText.h>
 #import "DHTextLayout.h"
+
+static const CGFloat kMaxLabelHeight = 1000000;
+
 @interface DHLabel ()
 @property (nonatomic, strong) DHTextLayout *layout;
 @end
@@ -68,4 +71,22 @@
     [self setNeedsDisplay];
 }
 
+- (void) sizeToFit
+{
+    self.bounds = self.layout.textBoundingRect;
+}
+
++ (CGRect) textBoundingRectForAttributedString:(NSAttributedString *)attributedString
+                                      maxWidth:(CGFloat)width;
+{
+    return [DHLabel textBoundingRectForAttributedString:attributedString
+                                                maxSize:CGSizeMake(width, kMaxLabelHeight)];
+}
+
++ (CGRect) textBoundingRectForAttributedString:(NSAttributedString *)attributedString maxSize:(CGSize)size
+{
+    DHTextLayout *layout = [DHTextLayout layoutWithContainerSize:size
+                                                         text:attributedString];
+    return layout.textBoundingRect;
+}
 @end

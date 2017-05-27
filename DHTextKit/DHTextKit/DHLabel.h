@@ -20,4 +20,10 @@
 @property (nonatomic, strong) UIColor *shadowColor;
 @property (nonatomic) CGFloat shadowOffset;
 
++ (CGRect) textBoundingRectForAttributedString:(NSAttributedString *)attributedString
+                                      maxWidth:(CGFloat)width;
+
++ (CGRect) textBoundingRectForAttributedString:(NSAttributedString *)attributedString
+                                       maxSize:(CGSize)size;
+
 @end
