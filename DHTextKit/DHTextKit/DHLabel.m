@@ -18,15 +18,31 @@ static const CGFloat kMaxLabelHeight = 1000000;
 
 @implementation DHLabel
 
-- (void)drawRect:(CGRect)rect {
-    [self.layout drawInContext:UIGraphicsGetCurrentContext()
-                          size:self.bounds.size
-                         point:CGPointZero
-                          view:self
-                         layer:nil
-                        cancel:nil];
+#pragma mark - Initialization
+- (instancetype) initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setup];
+    }
+    return self;
 }
 
+- (void) awakeFromNib
+{
+    [super awakeFromNib];
+    [self setup];
+}
+
+- (void) setup
+{
+    self.backgroundColor = [UIColor clearColor];
+    self.shadowColor = [UIColor blackColor];
+    self.textColor = [UIColor blackColor];
+    self.shadowOffset = 5;
+}
+
+#pragma mark - Update Properties
 - (NSAttributedString *) attributedStringToDraw
 {
     if (self.attribtuedText) {
@@ -88,5 +104,15 @@ static const CGFloat kMaxLabelHeight = 1000000;
     DHTextLayout *layout = [DHTextLayout layoutWithContainerSize:size
                                                          text:attributedString];
     return layout.textBoundingRect;
+}
+
+#pragma mark - Drawing
+- (void)drawRect:(CGRect)rect {
+    [self.layout drawInContext:UIGraphicsGetCurrentContext()
+                          size:self.bounds.size
+                         point:CGPointZero
+                          view:self
+                         layer:nil
+                        cancel:nil];
 }
 @end

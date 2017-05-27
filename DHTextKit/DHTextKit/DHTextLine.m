@@ -9,6 +9,7 @@
 #import "DHTextLine.h"
 #import "DHTextUtils.h"
 #import "DHTextAttribute.h"
+#import "DHTextShadow.h"
 
 @interface DHTextLine () {
     CGFloat _firstGlyphPos;
@@ -166,6 +167,40 @@
                         size:(CGSize)size
                     position:(CGPoint)position
 {
+    CGFloat offsetAlterX = size.width + 0xFFFF;     //Move out of context to avoid blend
+    CGContextSaveGState(context);
+    CGFloat linePosX = self.position.x;
+    CGFloat linePosY = size.height - self.position.y;
+    CFArrayRef runs = CTLineGetGlyphRuns(_ctLine);
+    CFIndex numberOfRuns = CFArrayGetCount(runs);
+    for (CFIndex runNo = 0; runNo < numberOfRuns; runNo++) {
+        CTRunRef run = CFArrayGetValueAtIndex(runs, runNo);
+        CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+        CGContextSetTextPosition(context, linePosX, linePosY);
+        NSDictionary *attributes = (id)CTRunGetAttributes(run);
+        DHTextShadow *shadow = attributes[DHTextShadowAttributeName];
+        DHTextShadow *nsShadow = [DHTextShadow shadowWithNSShadow:attributes[NSShadowAttributeName]];
+        if (nsShadow) {
+            nsShadow.subShadow = shadow;
+            shadow = nsShadow;
+        }
+        while (shadow) {
+            if (shadow.color == nil) {
+                shadow = shadow.subShadow;
+                continue;
+            }
+            CGSize offset = shadow.offset;
+            offset.width -= offsetAlterX;
+            CGContextSaveGState(context); {
+                CGContextSetShadowWithColor(context, offset, shadow.radius, shadow.color.CGColor);
+                CGContextSetBlendMode(context, shadow.blendMode);
+                CGContextTranslateCTM(context, offsetAlterX, 0);
+                CTRunDraw(run, context, CFRangeMake(0, 0));
+            }
+            CGContextRestoreGState(context);
+            shadow = shadow.subShadow;
+        }
+    }
     
 }
 

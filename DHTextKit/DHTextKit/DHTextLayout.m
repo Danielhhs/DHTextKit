@@ -106,21 +106,4 @@
     }
 }
 
-- (void) drawTextInContext:(CGContextRef)context
-                      size:(CGSize)size
-                     point:(CGPoint)point
-{
-}
-
-- (void) drawAttachmentsInContext:(CGContextRef)context
-                             size:(CGSize)size
-                            point:(CGPoint)point
-                           inView:(UIView *)view
-                          orLayer:(CALayer *)layer
-{
-    for (int i = 0; i < [self.attachments count]; i++) {
-        
-    }
-}
-
 @end

@@ -19,10 +19,15 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     DHLabel *label = [[DHLabel alloc] initWithFrame:CGRectMake(100, 100, 200, 100)];
-    UIFont *font = [UIFont systemFontOfSize:15];
+    UIFont *font = [UIFont boldSystemFontOfSize:30];
     UIColor *color = [UIColor redColor];
+    NSShadow *shadow = [[NSShadow alloc] init];
+    shadow.shadowColor = [UIColor blackColor];
+    shadow.shadowOffset = CGSizeMake(5, 5);
+    shadow.shadowBlurRadius = 10;
     NSDictionary *attributes = @{NSFontAttributeName : font,
-                                 NSForegroundColorAttributeName : color};
+                                 NSForegroundColorAttributeName : color,
+                                 NSShadowAttributeName : shadow};
     NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:@"Any" attributes:attributes];
     NSAttributedString *attachment = [NSAttributedString dh_attachmentStringWithContent:[UIImage imageNamed:@"Delete.png"]
                                                                             contentMode:UIViewContentModeScaleToFill
