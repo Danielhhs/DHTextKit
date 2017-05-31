@@ -8,6 +8,7 @@
 
 #import "DHTextAttribute.h"
 
+NSString *const DHTextInnerShadowAttributeName = @"DHTextInnerShadowAttribute";
 NSString *const DHTextShadowAttributeName = @"DHTextShadowAttribute";
 NSString *const DHTextAttachmentAttributeName = @"DHTextAttachmentAttribute";
 NSString *const DHTextGlyphTransformAttributeName = @"DHTextGlyphTransformAttributeName";

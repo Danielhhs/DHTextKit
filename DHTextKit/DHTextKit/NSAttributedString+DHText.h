@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <CoreText/CoreText.h>
 #import "DHTextAttribute.h"
+#import "DHTextShadow.h"
 #import "DHTextAttachment.h"
 
 @interface NSAttributedString (DHText)
@@ -43,6 +44,7 @@
 - (void) setStrokeWidth:(nullable NSNumber *)strokeWidth;
 - (void) setStrokeColor:(nullable UIColor *)strokeColor;
 - (void) setShadow:(nullable NSShadow *)shadow;
+- (void) setInnerShadow:(nullable DHTextShadow *)innerShadow;
 - (void) setParagraphStyle:(nullable NSParagraphStyle *) paragraphStyle;
 - (void) setAliegnment:(NSTextAlignment)alignment;
 - (void) setLineBreakMode:(NSLineBreakMode)lineBreakMode;
@@ -59,6 +61,7 @@
 - (void) setStrokeWidth:(nullable NSNumber *)strokeWidth forRange:(NSRange)range;
 - (void) setStrokeColor:(nullable UIColor *)strokeColor forRange:(NSRange)range;
 - (void) setShadow:(nullable NSShadow *)shadow forRange:(NSRange)range;
+- (void) setInnerShadow:(nullable DHTextShadow *)innerShadow forRange:(NSRange)range;
 - (void) setParagraphStyle:(nullable NSParagraphStyle *) paragraphStyle forRange:(NSRange)range;
 - (void) setAliegnment:(NSTextAlignment)alignment forRange:(NSRange)range;
 - (void) setLineBreakMode:(NSLineBreakMode)lineBreakMode forRange:(NSRange)range;

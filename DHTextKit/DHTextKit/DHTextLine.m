@@ -30,6 +30,12 @@
 @property (nonatomic, readwrite) CGFloat leading;
 @property (nonatomic, readwrite) CGFloat lineWidth;
 @property (nonatomic, readwrite) CGFloat trailingWhiteSpaceWidth;
+
+//Improve drawing efficiency.
+@property (nonatomic) BOOL needToDrawShadow;
+@property (nonatomic) BOOL needToDrawAttachment;
+@property (nonatomic) BOOL needToDrawInnerShadow;
+@property (nonatomic) BOOL needToDrawText;
 @end
 
 @implementation DHTextLine
@@ -78,10 +84,13 @@
 
 - (void) setPosition:(CGPoint)position
 {
-    _position = position;
-    [self reloadLine];
+    if (!CGPointEqualToPoint(position, _position)) {
+        _position = position;
+        [self reloadLine];
+    }
 }
 
+//TO-DO: Called twice while initialization;
 - (void) reloadLine
 {
     [self updateBounds];
@@ -91,6 +100,7 @@
         return;
     }
     [self reloadAttachments];
+    [self reloadDrawingStatus];
 }
 
 - (void) updateBounds
@@ -149,6 +159,36 @@
     _attachmentRects = [attachmentRects count] == 0 ? nil : attachmentRects;
 }
 
+- (void) reloadDrawingStatus
+{
+    [self clearDrawingStatus];
+    CFArrayRef runs = CTLineGetGlyphRuns(self.ctLine);
+    CFIndex runCount = CFArrayGetCount(runs);
+    for (CFIndex runNo = 0; runNo < runCount; runNo++) {
+        CTRunRef run = CFArrayGetValueAtIndex(runs, runNo);
+        NSDictionary *attribtues = (id) CTRunGetAttributes(run);
+        if (CTRunGetGlyphCount(run) > 0) {
+            self.needToDrawText = YES;
+        }
+        if (attribtues[NSShadowAttributeName] || attribtues[DHTextShadowAttributeName]) {
+            self.needToDrawShadow = YES;
+        }
+        if (attribtues[DHTextAttachmentAttributeName]) {
+            self.needToDrawAttachment = YES;
+        }
+        if (attribtues[DHTextInnerShadowAttributeName]) {
+            self.needToDrawInnerShadow = YES;
+        }
+    }
+}
+
+- (void) clearDrawingStatus
+{
+    self.needToDrawShadow = NO;
+    self.needToDrawAttachment = NO;
+    self.needToDrawInnerShadow = NO;
+}
+
 #pragma mark - Drawing
 - (void) drawInContext:(CGContextRef)context
                   size:(CGSize)size
@@ -166,6 +206,9 @@
                         size:(CGSize)size
                     position:(CGPoint)position
 {
+    if (self.needToDrawShadow == NO) {
+        return ;
+    }
     CGFloat offsetAlterX = size.width + 0xFFFF;     //Move out of context to avoid blend
     CGContextSaveGState(context);
     CGFloat linePosX = self.position.x;
@@ -207,6 +250,9 @@
                       size:(CGSize)size
                   position:(CGPoint)position
 {
+    if (self.needToDrawText == NO) {
+        return;
+    }
     CGPoint lineOrigin;
     lineOrigin.x = self.position.x;
     lineOrigin.y = self.position.y;
@@ -226,6 +272,9 @@
                            inView:(UIView *)targetView
                           orLayer:(CALayer *)targetLayer
 {
+    if (self.needToDrawAttachment == NO) {
+        return;
+    }
     for (NSInteger i = 0; i < [self.attachments count]; i++) {
         DHTextAttachment *attachment = self.attachments[i];
         if (attachment.content == nil) {
@@ -277,6 +326,9 @@
                              size:(CGSize)size
                          position:(CGPoint)position
 {
+    if (self.needToDrawInnerShadow == NO) {
+        return ;
+    }
     CGPoint lineOrigin;
     lineOrigin.x = self.position.x;
     lineOrigin.y = self.position.y;
@@ -288,7 +340,7 @@
         CGContextSetTextMatrix(context, CGAffineTransformIdentity);
         CGContextSetTextPosition(context, lineOrigin.x, size.height - lineOrigin.y);
         NSDictionary *attributes = (id)CTRunGetAttributes(run);
-        DHTextShadow *shadow = attributes[DHTextShadowAttributeName];
+        DHTextShadow *shadow = attributes[DHTextInnerShadowAttributeName];
         while (shadow) {
             if (!shadow.color) {
                 shadow = shadow.subShadow;

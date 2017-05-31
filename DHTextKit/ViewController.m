@@ -24,7 +24,7 @@
     label.truncationType = DHTextTruncationTypeEnd;
     label.truncationToken = [[NSAttributedString alloc] initWithString:@"YES"];
 //    label.lineBreakMode = NSLineBreakByCharWrapping;
-    UIFont *font = [UIFont boldSystemFontOfSize:60];
+    UIFont *font = [UIFont boldSystemFontOfSize:16];
     UIColor *color = [UIColor whiteColor];
     NSShadow *shadow = [[NSShadow alloc] init];
     shadow.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
@@ -33,7 +33,7 @@
     DHTextShadow *textShadow = [DHTextShadow shadowWithNSShadow:shadow];
     NSDictionary *attributes = @{NSFontAttributeName : font,
                                  NSForegroundColorAttributeName : color,
-                                 DHTextShadowAttributeName : textShadow};
+                                 DHTextInnerShadowAttributeName : textShadow};
     NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:@"Any" attributes:attributes];
     NSAttributedString *attachment = [NSAttributedString dh_attachmentStringWithContent:[UIImage imageNamed:@"Delete.png"]
                                                                             contentMode:UIViewContentModeScaleToFill
@@ -45,7 +45,7 @@
     [attrStr appendAttributedString:attachment];
 //    [attrStr setStrokeColor:[UIColor blueColor]];
 //    [attrStr setStrokeWidth:@(5)];
-//    [attrStr setLineBreakMode:NSLineBreakByCharWrapping];
+    [attrStr setLineBreakMode:NSLineBreakByCharWrapping];
     label.attribtuedText = attrStr;
     [label sizeToFit];
     [self.view addSubview:label];

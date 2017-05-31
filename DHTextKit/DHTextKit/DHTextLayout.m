@@ -106,6 +106,7 @@ typedef struct {
     return lines;
 }
 
+
 - (void) truncateWithCTLines:(CFArrayRef)ctLines
                        lines:(NSMutableArray *)lines
                         path:(CGPathRef)path

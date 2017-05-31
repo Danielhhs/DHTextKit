@@ -216,6 +216,16 @@
     [self setAttribute:NSShadowAttributeName value:shadow range:range];
 }
 
+- (void) setInnerShadow:(DHTextShadow *)innerShadow
+{
+    [self setInnerShadow:innerShadow forRange:NSMakeRange(0, [self length])];
+}
+
+- (void) setInnerShadow:(DHTextShadow *)innerShadow forRange:(NSRange)range
+{
+    [self setAttribute:DHTextInnerShadowAttributeName value:innerShadow range:range];
+}
+
 - (void) setParagraphStyle:(NSParagraphStyle *)paragraphStyle
 {
     [self setParagraphStyle:paragraphStyle forRange:NSMakeRange(0, [self length])];
