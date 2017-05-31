@@ -23,6 +23,7 @@
 @property (nonatomic, readonly) UIEdgeInsets insets;
 @property (nonatomic, strong, readonly, nullable) UIBezierPath *path;
 @property (nonatomic) DHTextTruncationType truncationType;
+@property (nonatomic) NSInteger maximumNumberOfRows;
 @property (nonatomic, strong, nullable) NSAttributedString *truncationToken;    //Truncation place holder, if nil, use "..."
 
 @end

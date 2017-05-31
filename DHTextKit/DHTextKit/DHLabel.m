@@ -16,6 +16,7 @@ static const CGFloat kMaxLabelHeight = 1000000;
 
 @interface DHLabel ()<DHAsyncDisplayLayerDelegate>
 @property (nonatomic, strong) DHTextLayout *layout;
+@property (nonatomic, strong) DHTextContainer *textContainer;
 @property (nonatomic) BOOL needsToUpdateLayout;
 @end
 
@@ -96,7 +97,12 @@ static const CGFloat kMaxLabelHeight = 1000000;
 {
     if (self.needsToUpdateLayout) {
         self.needsToUpdateLayout = NO;
-        self.layout = [DHTextLayout layoutWithContainerSize:self.bounds.size text:[self attributedStringToDraw]];
+        self.textContainer = [DHTextContainer containerWithSize:self.bounds.size];
+        self.textContainer.maximumNumberOfRows = self.maximumNumberOfRows;
+        self.textContainer.truncationType = self.truncationType;
+        self.textContainer.truncationToken = self.truncationToken;
+        self.layout = [DHTextLayout layoutWithContainer:self.textContainer
+                                                   text:[self attributedStringToDraw]];
         [self setNeedsDisplay];
     }
 }

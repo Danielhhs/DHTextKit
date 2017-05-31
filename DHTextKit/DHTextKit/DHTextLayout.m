@@ -51,6 +51,7 @@ typedef struct {
     layout.text = text;
     layout.container = container;
     layout.range = range;
+    layout.maximumNumberOfRows = container.maximumNumberOfRows;
     [layout setup];
     return layout;
 }
@@ -99,6 +100,7 @@ typedef struct {
         position.y = pathBox.origin.y + pathBox.size.height - lineOrigin.y;
         DHTextLine *line = [DHTextLine lineWithCTLine:ctLine position:position];
         line.row = lineNo;
+        line.index = lineNo;
         [lines addObject:line];
     }
     return lines;
@@ -165,33 +167,34 @@ typedef struct {
                         if (attributes == nil) {
                             attributes = [NSMutableDictionary dictionary];
                         }
-                        truncationToken = [[NSAttributedString alloc] initWithString:DHTextTruncationToken attributes:attributes];
-                        truncationTokenLine = CTLineCreateWithAttributedString((CFAttributedStringRef)truncationToken);
                     }
-                    if (truncationTokenLine) {
-                        CTLineTruncationType type = [DHTextUtils ctLineTruncationTypeFromDHTurncationType:self.container.truncationType];
-                        NSMutableAttributedString *lastLineText = [[self.text attributedSubstringFromRange:lastLine.range] mutableCopy];
-                        [lastLineText appendAttributedString:truncationToken];
-                        CTLineRef lastLineExtend = CTLineCreateWithAttributedString((CFAttributedStringRef)lastLineText);
-                        if (lastLineExtend) {
-                            CGFloat truncatedWidth = [lastLine width];
-                            CGRect cgPathRect = CGRectZero;
-                            if (CGPathIsRect(path, &cgPathRect)) {
-                                truncatedWidth = cgPathRect.size.width;
-                            }
-                            CTLineRef ctTruncatedLine = CTLineCreateTruncatedLine(lastLineExtend, truncatedWidth, type, truncationTokenLine);
-                            CFRelease(lastLineExtend);
-                            if (ctTruncatedLine) {
-                                truncationLine = [DHTextLine lineWithCTLine:ctTruncatedLine position:lastLine.position];
-                                truncationLine.index = lastLine.index;
-                                truncationLine.row = lastLine.index;
-                                self.truncatedLine = truncationLine;
-                                CFRelease(ctTruncatedLine);
-                            }
-                        }
-                        CFRelease(truncationTokenLine);
-                    }
+                    truncationToken = [[NSAttributedString alloc] initWithString:DHTextTruncationToken attributes:attributes];
+                    truncationTokenLine = CTLineCreateWithAttributedString((CFAttributedStringRef)truncationToken);
                 }
+                if (truncationTokenLine) {
+                    CTLineTruncationType type = [DHTextUtils ctLineTruncationTypeFromDHTurncationType:self.container.truncationType];
+                    NSMutableAttributedString *lastLineText = [[self.text attributedSubstringFromRange:lastLine.range] mutableCopy];
+                    [lastLineText appendAttributedString:truncationToken];
+                    CTLineRef lastLineExtend = CTLineCreateWithAttributedString((CFAttributedStringRef)lastLineText);
+                    if (lastLineExtend) {
+                        CGFloat truncatedWidth = [lastLine width];
+                        CGRect cgPathRect = CGRectZero;
+                        if (CGPathIsRect(path, &cgPathRect)) {
+                            truncatedWidth = cgPathRect.size.width;
+                        }
+                        CTLineRef ctTruncatedLine = CTLineCreateTruncatedLine(lastLineExtend, truncatedWidth, type, truncationTokenLine);
+                        CFRelease(lastLineExtend);
+                        if (ctTruncatedLine) {
+                            truncationLine = [DHTextLine lineWithCTLine:ctTruncatedLine position:lastLine.position];
+                            truncationLine.index = lastLine.index;
+                            truncationLine.row = lastLine.index;
+                            self.truncatedLine = truncationLine;
+                            CFRelease(ctTruncatedLine);
+                        }
+                    }
+                    CFRelease(truncationTokenLine);
+                }
+                
             }
         }
     }
@@ -208,13 +211,6 @@ typedef struct {
     UIEdgeInsets insetsInverse = UIEdgeInsetsMake(-insets.top, -insets.left, -insets.bottom, -insets.right);
     textBoundingRect = UIEdgeInsetsInsetRect(textBoundingRect, insetsInverse);
     self.textBoundingRect = textBoundingRect;
-}
-
-#pragma mark - Setters
-- (void) setMaximumNumberOfRows:(NSInteger)maximumNumberOfRows
-{
-    _maximumNumberOfRows = maximumNumberOfRows;
-    [self setup];
 }
 
 #pragma mark - Drawing

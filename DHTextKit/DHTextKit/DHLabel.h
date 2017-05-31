@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DHTextAttribute.h"
 
 @interface DHLabel : UIView
 
@@ -20,6 +21,8 @@
 @property (nonatomic, strong) UIColor *shadowColor;
 @property (nonatomic) CGFloat shadowOffset;
 @property (nonatomic) NSInteger maximumNumberOfRows;
+@property (nonatomic) DHTextTruncationType truncationType;
+@property (nonatomic, strong) NSAttributedString *truncationToken;
 
 //Paragraph styles
 @property (nonatomic) NSLineBreakMode lineBreakMode;

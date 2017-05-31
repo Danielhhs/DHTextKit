@@ -19,9 +19,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     DHLabel *label = [[DHLabel alloc] initWithFrame:CGRectMake(100, 100, 200, 100)];
-    label.maximumNumberOfRows = 1;
+    label.maximumNumberOfRows = 2;
+    label.truncationType = DHTextTruncationTypeEnd;
+    label.truncationToken = [[NSAttributedString alloc] initWithString:@"YES"];
 //    label.lineBreakMode = NSLineBreakByCharWrapping;
-    UIFont *font = [UIFont boldSystemFontOfSize:22];
+    UIFont *font = [UIFont boldSystemFontOfSize:28];
     UIColor *color = [UIColor redColor];
 //    NSShadow *shadow = [[NSShadow alloc] init];
 //    shadow.shadowColor = [UIColor blackColor];
