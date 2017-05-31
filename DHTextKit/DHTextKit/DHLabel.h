@@ -21,6 +21,11 @@
 @property (nonatomic) CGFloat shadowOffset;
 @property (nonatomic) NSInteger maximumNumberOfRows;
 
+//Paragraph styles
+@property (nonatomic) NSLineBreakMode lineBreakMode;
+@property (nonatomic) CGFloat lineSpacing;
+@property (nonatomic) CGFloat paragraphSpacing;
+
 + (CGRect) textBoundingRectForAttributedString:(NSAttributedString *)attributedString
                                       maxWidth:(CGFloat)width;
 

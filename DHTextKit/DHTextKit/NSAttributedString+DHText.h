@@ -36,6 +36,22 @@
 - (void) setAttribute:(nonnull NSString *)attribute value:(nullable id) value range:(NSRange)range;
 - (void) removeAttributesInRange:(NSRange)range;
 
+- (void) setFont:(nullable UIFont *)font;
+- (void) setKern:(nullable NSNumber *)kern;
+- (void) setColor:(nullable UIColor *)color;
+- (void) setBackgroundColor:(nullable UIColor *)backgroundColor;
+- (void) setStrokeWidth:(nullable NSNumber *)strokeWidth;
+- (void) setStrokeColor:(nullable UIColor *)strokeColor;
+- (void) setShadow:(nullable NSShadow *)shadow;
+- (void) setParagraphStyle:(nullable NSParagraphStyle *) paragraphStyle;
+- (void) setAliegnment:(NSTextAlignment)alignment;
+- (void) setLineBreakMode:(NSLineBreakMode)lineBreakMode;
+- (void) setLineSpacing:(CGFloat)lineSpacing;
+- (void) setParagraphSpacing:(CGFloat)paragraphSpacing;
+- (void) setRunDelegate:(nullable CTRunDelegateRef)runDelegate;
+- (void) setAttachment:(nullable NSTextAttachment *)attachment;
+- (void) setTextAttachment:(nullable DHTextAttachment *)textAttachment;
+
 - (void) setFont:(nullable UIFont *)font forRange:(NSRange)range;
 - (void) setKern:(nullable NSNumber *)kern forRange:(NSRange)range;
 - (void) setColor:(nullable UIColor *)color forRange:(NSRange)range;
@@ -43,11 +59,11 @@
 - (void) setStrokeWidth:(nullable NSNumber *)strokeWidth forRange:(NSRange)range;
 - (void) setStrokeColor:(nullable UIColor *)strokeColor forRange:(NSRange)range;
 - (void) setShadow:(nullable NSShadow *)shadow forRange:(NSRange)range;
-- (void) setParagraphSytle:(nullable NSParagraphStyle *) paragraphStyle forRange:(NSRange)range;
+- (void) setParagraphStyle:(nullable NSParagraphStyle *) paragraphStyle forRange:(NSRange)range;
 - (void) setAliegnment:(NSTextAlignment)alignment forRange:(NSRange)range;
 - (void) setLineBreakMode:(NSLineBreakMode)lineBreakMode forRange:(NSRange)range;
-- (void) setLineSpacing:(nullable NSNumber *)lineSpacing forRange:(NSRange)range;
-- (void) setParagraphSpacing:(nullable NSNumber *)paragraphSpacing forRange:(NSRange)range;
+- (void) setLineSpacing:(CGFloat)lineSpacing forRange:(NSRange)range;
+- (void) setParagraphSpacing:(CGFloat)paragraphSpacing forRange:(NSRange)range;
 - (void) setRunDelegate:(nullable CTRunDelegateRef)runDelegate forRange:(NSRange)range;
 - (void) setAttachment:(nullable NSTextAttachment *)attachment forRange:(NSRange)range;
 - (void) setTextAttachment:(nullable DHTextAttachment *)textAttachment forRange:(NSRange)range;

@@ -20,15 +20,15 @@
     [super viewDidLoad];
     DHLabel *label = [[DHLabel alloc] initWithFrame:CGRectMake(100, 100, 200, 100)];
     label.maximumNumberOfRows = 1;
-    UIFont *font = [UIFont boldSystemFontOfSize:30];
+//    label.lineBreakMode = NSLineBreakByCharWrapping;
+    UIFont *font = [UIFont boldSystemFontOfSize:22];
     UIColor *color = [UIColor redColor];
-    NSShadow *shadow = [[NSShadow alloc] init];
-    shadow.shadowColor = [UIColor blackColor];
-    shadow.shadowOffset = CGSizeMake(5, 5);
-    shadow.shadowBlurRadius = 10;
+//    NSShadow *shadow = [[NSShadow alloc] init];
+//    shadow.shadowColor = [UIColor blackColor];
+//    shadow.shadowOffset = CGSizeMake(5, 5);
+//    shadow.shadowBlurRadius = 10;
     NSDictionary *attributes = @{NSFontAttributeName : font,
-                                 NSForegroundColorAttributeName : color,
-                                 NSShadowAttributeName : shadow};
+                                 NSForegroundColorAttributeName : color};
     NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:@"Any" attributes:attributes];
     NSAttributedString *attachment = [NSAttributedString dh_attachmentStringWithContent:[UIImage imageNamed:@"Delete.png"]
                                                                             contentMode:UIViewContentModeScaleToFill
@@ -38,6 +38,9 @@
     NSAttributedString *tail = [[NSAttributedString alloc] initWithString:@"thing you want to sayladjlasdlasd" attributes:attributes];
     [attrStr appendAttributedString:tail];
     [attrStr appendAttributedString:attachment];
+    [attrStr setStrokeColor:[UIColor blueColor]];
+    [attrStr setStrokeWidth:@(5)];
+//    [attrStr setLineBreakMode:NSLineBreakByCharWrapping];
     label.attribtuedText = attrStr;
     [label sizeToFit];
     [self.view addSubview:label];

@@ -10,6 +10,7 @@
 #import <CoreText/CoreText.h>
 #import "DHTextLayout.h"
 #import "DHAsyncDisplayLayer.h"
+#import "NSAttributedString+DHText.h"
 
 static const CGFloat kMaxLabelHeight = 1000000;
 
@@ -56,29 +57,21 @@ static const CGFloat kMaxLabelHeight = 1000000;
     if (self.attribtuedText) {
         return self.attribtuedText;
     } else {
-        NSDictionary *attributes = [self textAttributes];
         if (self.text == nil) {
             return nil;
         }
-        NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:self.text
-                                                                      attributes:attributes];
+        NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:self.text];
+        [attrStr setLineBreakMode:self.lineBreakMode];
+        [attrStr setFont:self.font];
+        [attrStr setColor:self.textColor];
         return attrStr;
     }
-}
-
-- (NSDictionary *) textAttributes
-{
-    UIFont *font = (self.font != nil) ? self.font : [UIFont systemFontOfSize:16];
-    UIColor *textColor = (self.textColor != nil) ? self.textColor : [UIColor blackColor];
-    return @{NSFontAttributeName : font,
-             NSForegroundColorAttributeName : textColor};
 }
 
 - (void) setAttribtuedText:(NSAttributedString *)attribtuedText
 {
     _attribtuedText = attribtuedText;
-    self.layout = [DHTextLayout layoutWithContainerSize:self.bounds.size text:attribtuedText];
-    [self setNeedsDisplay];
+    [self setNeedsToUpdateLayout];
 }
 
 - (void) setBounds:(CGRect)bounds
@@ -116,6 +109,7 @@ static const CGFloat kMaxLabelHeight = 1000000;
 
 - (void) sizeToFit
 {
+    [self updateLayoutIfNeeds];
     self.bounds = self.layout.textBoundingRect;
 }
 
