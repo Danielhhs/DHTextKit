@@ -9,11 +9,13 @@
 #import "DHLabel.h"
 #import <CoreText/CoreText.h>
 #import "DHTextLayout.h"
+#import "DHAsyncDisplayLayer.h"
 
 static const CGFloat kMaxLabelHeight = 1000000;
 
-@interface DHLabel ()
+@interface DHLabel ()<DHAsyncDisplayLayerDelegate>
 @property (nonatomic, strong) DHTextLayout *layout;
+@property (nonatomic) BOOL needsToUpdateLayout;
 @end
 
 @implementation DHLabel
@@ -36,12 +38,18 @@ static const CGFloat kMaxLabelHeight = 1000000;
 
 - (void) setup
 {
+    DHAsyncDisplayLayer *layer = (DHAsyncDisplayLayer *)self.layer;
+    layer.displayDelegate = self;
     self.backgroundColor = [UIColor clearColor];
     self.shadowColor = [UIColor blackColor];
     self.textColor = [UIColor blackColor];
     self.shadowOffset = 5;
 }
 
++ (Class) layerClass
+{
+    return [DHAsyncDisplayLayer class];
+}
 #pragma mark - Update Properties
 - (NSAttributedString *) attributedStringToDraw
 {
@@ -76,15 +84,34 @@ static const CGFloat kMaxLabelHeight = 1000000;
 - (void) setBounds:(CGRect)bounds
 {
     [super setBounds:bounds];
-    self.layout = [DHTextLayout layoutWithContainerSize:self.bounds.size text:[self attributedStringToDraw]];
-    [self setNeedsDisplay];
+    [self setNeedsToUpdateLayout];
 }
 
 - (void) setFrame:(CGRect)frame
 {
     [super setFrame:frame];
-    self.layout = [DHTextLayout layoutWithContainerSize:self.bounds.size text:[self attributedStringToDraw]];
+    [self setNeedsToUpdateLayout];
+}
+
+- (void) setNeedsToUpdateLayout
+{
+    self.needsToUpdateLayout = YES;
     [self setNeedsDisplay];
+}
+
+- (void) updateLayoutIfNeeds
+{
+    if (self.needsToUpdateLayout) {
+        self.needsToUpdateLayout = NO;
+        self.layout = [DHTextLayout layoutWithContainerSize:self.bounds.size text:[self attributedStringToDraw]];
+        [self setNeedsDisplay];
+    }
+}
+
+- (void) setNeedsDisplay
+{
+    [super setNeedsDisplay];
+    [self.layer setNeedsDisplay];
 }
 
 - (void) sizeToFit
@@ -107,12 +134,29 @@ static const CGFloat kMaxLabelHeight = 1000000;
 }
 
 #pragma mark - Drawing
-- (void)drawRect:(CGRect)rect {
-    [self.layout drawInContext:UIGraphicsGetCurrentContext()
-                          size:self.bounds.size
-                         point:CGPointZero
-                          view:self
-                         layer:nil
-                        cancel:nil];
+//- (void)drawRect:(CGRect)rect {
+//    [self.layout drawInContext:UIGraphicsGetCurrentContext()
+//                          size:self.bounds.size
+//                         point:CGPointZero
+//                          view:self
+//                         layer:nil
+//                        cancel:nil];
+//}
+
+#pragma mark - DHAsyncDisplayLayerDelegate
+- (DHAsyncDisplayTask *) asyncDisplayTask
+{
+    DHAsyncDisplayTask *task = [[DHAsyncDisplayTask alloc] init];
+    task.willDisplay = ^(CALayer *layer) {
+        
+    };
+    
+    task.display = ^(CGContextRef context, CGSize size) {
+        [self updateLayoutIfNeeds];
+        [self.layout drawInContext:context size:size point:CGPointZero view:self layer:self.layer cancel:nil];
+    };
+    
+    task.didDisplay = nil;
+    return task;
 }
 @end
