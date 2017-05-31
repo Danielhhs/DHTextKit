@@ -26,6 +26,7 @@ typedef NS_ENUM(NSInteger, DHTextVerticalAlignment) {
 
 UIKIT_EXTERN NSString *const DHTextShadowAttributeName;     //Value should be instance of DHTextShadow
 UIKIT_EXTERN NSString *const DHTextAttachmentAttributeName; //Value should be instance of DHTextAttachment
+UIKIT_EXTERN NSString *const DHTextGlyphTransformAttributeName; //Value should be instance of NSValue wrapping CGAffineTransform
 
 UIKIT_EXTERN NSString *const DHTextAttachmentToken; ///U+FFFC, used for text attachment.
 UIKIT_EXTERN NSString *const DHTextTruncationToken; ///U+2026, used for text truncation  "…"

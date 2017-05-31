@@ -158,6 +158,7 @@
 {
     [self drawShadowInContext:context size:size position:position];
     [self drawTextInContext:context size:size position:position];
+    [self drawInnerShadowInContext:context size:size position:position];
     [self drawAttachmentsInContext:context size:size position:position inView:view orLayer:layer];
 }
 
@@ -213,7 +214,7 @@
     CFIndex numberOfRuns = CFArrayGetCount(runs);
     for (CFIndex runNo = 0; runNo < numberOfRuns; runNo++) {
         CTRunRef run = CFArrayGetValueAtIndex(runs, runNo);
-        CGContextSetTextMatrix(NULL, CGAffineTransformIdentity);
+        CGContextSetTextMatrix(context, CGAffineTransformIdentity);
         CGContextSetTextPosition(context, lineOrigin.x, size.height - lineOrigin.y);
         CTRunDraw(run, context, [DHTextUtils emptyCFRange]);
     }
@@ -268,6 +269,64 @@
         } else if (layer) {
             layer.frame = rect;
             [targetLayer addSublayer:layer];
+        }
+    }
+}
+
+- (void) drawInnerShadowInContext:(CGContextRef)context
+                             size:(CGSize)size
+                         position:(CGPoint)position
+{
+    CGPoint lineOrigin;
+    lineOrigin.x = self.position.x;
+    lineOrigin.y = self.position.y;
+    CFArrayRef runs = CTLineGetGlyphRuns(self.ctLine);
+    CFIndex runCount = CFArrayGetCount(runs);
+    for (CFIndex runNo = 0; runNo < runCount; runNo++) {
+        CTRunRef run = CFArrayGetValueAtIndex(runs, runNo);
+        if (CTRunGetGlyphCount(run) == 0) continue;
+        CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+        CGContextSetTextPosition(context, lineOrigin.x, size.height - lineOrigin.y);
+        NSDictionary *attributes = (id)CTRunGetAttributes(run);
+        DHTextShadow *shadow = attributes[DHTextShadowAttributeName];
+        while (shadow) {
+            if (!shadow.color) {
+                shadow = shadow.subShadow;
+                continue;
+            }
+            CGPoint runPosition = CGPointZero;
+            CTRunGetPositions(run, CFRangeMake(0, 1), &runPosition);
+            CGRect runImageBounds = CTRunGetImageBounds(run, context, CFRangeMake(0, 0));
+            runImageBounds.origin.x += runPosition.x;
+            if (runImageBounds.size.width < 0.1 || runImageBounds.size.height < 0.1) continue;  //Too small to draw
+            
+            CFDictionaryRef runAttrs = CTRunGetAttributes(run);
+            NSValue *glyphTransform = CFDictionaryGetValue(runAttrs, (__bridge const void *)DHTextGlyphTransformAttributeName);
+            if (glyphTransform) {
+                runImageBounds = CGRectMake(0, 0, size.width, size.height);
+            }
+            
+            CGContextSaveGState(context); {
+                CGContextSetBlendMode(context, shadow.blendMode);
+                CGContextSetShadowWithColor(context, CGSizeZero, 0, shadow.color.CGColor);
+                CGContextSetAlpha(context, CGColorGetAlpha(shadow.color.CGColor));
+                CGContextClipToRect(context, runImageBounds);
+                CGContextBeginTransparencyLayer(context, NULL); {
+                    UIColor *opaqueShadowColor = [shadow.color colorWithAlphaComponent:1];
+                    CGContextSetShadowWithColor(context, shadow.offset, shadow.radius, opaqueShadowColor.CGColor);
+                    CGContextSetFillColorWithColor(context, opaqueShadowColor.CGColor);
+                    CGContextSetBlendMode(context, kCGBlendModeSourceOut);
+                    CGContextBeginTransparencyLayer(context, NULL);{
+                        CGContextFillRect(context, runImageBounds);
+                        CGContextSetBlendMode(context, kCGBlendModeDestinationIn);
+                        CGContextBeginTransparencyLayer(context, NULL); {
+                            CTRunDraw(run, context, CFRangeMake(0, 0));
+                        } CGContextEndTransparencyLayer(context);
+                    }CGContextEndTransparencyLayer(context);
+                }CGContextEndTransparencyLayer(context);
+            }
+            CGContextRestoreGState(context);
+            shadow = shadow.subShadow;
         }
     }
 }

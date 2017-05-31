@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "DHLabel.h"
 #import "NSAttributedString+DHText.h"
+#import "DHTextShadow.h"
 
 @interface ViewController ()
 
@@ -23,14 +24,16 @@
     label.truncationType = DHTextTruncationTypeEnd;
     label.truncationToken = [[NSAttributedString alloc] initWithString:@"YES"];
 //    label.lineBreakMode = NSLineBreakByCharWrapping;
-    UIFont *font = [UIFont boldSystemFontOfSize:28];
-    UIColor *color = [UIColor redColor];
-//    NSShadow *shadow = [[NSShadow alloc] init];
-//    shadow.shadowColor = [UIColor blackColor];
-//    shadow.shadowOffset = CGSizeMake(5, 5);
-//    shadow.shadowBlurRadius = 10;
+    UIFont *font = [UIFont boldSystemFontOfSize:60];
+    UIColor *color = [UIColor whiteColor];
+    NSShadow *shadow = [[NSShadow alloc] init];
+    shadow.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
+    shadow.shadowOffset = CGSizeMake(1, 3);
+    shadow.shadowBlurRadius = 3;
+    DHTextShadow *textShadow = [DHTextShadow shadowWithNSShadow:shadow];
     NSDictionary *attributes = @{NSFontAttributeName : font,
-                                 NSForegroundColorAttributeName : color};
+                                 NSForegroundColorAttributeName : color,
+                                 DHTextShadowAttributeName : textShadow};
     NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:@"Any" attributes:attributes];
     NSAttributedString *attachment = [NSAttributedString dh_attachmentStringWithContent:[UIImage imageNamed:@"Delete.png"]
                                                                             contentMode:UIViewContentModeScaleToFill
@@ -40,8 +43,8 @@
     NSAttributedString *tail = [[NSAttributedString alloc] initWithString:@"thing you want to sayladjlasdlasd" attributes:attributes];
     [attrStr appendAttributedString:tail];
     [attrStr appendAttributedString:attachment];
-    [attrStr setStrokeColor:[UIColor blueColor]];
-    [attrStr setStrokeWidth:@(5)];
+//    [attrStr setStrokeColor:[UIColor blueColor]];
+//    [attrStr setStrokeWidth:@(5)];
 //    [attrStr setLineBreakMode:NSLineBreakByCharWrapping];
     label.attribtuedText = attrStr;
     [label sizeToFit];

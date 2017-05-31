@@ -232,6 +232,7 @@ typedef struct {
         }
         [line drawInContext:context size:size position:point inView:view orLayer:layer];
     }
+    CGContextRestoreGState(context);
 }
 
 @end

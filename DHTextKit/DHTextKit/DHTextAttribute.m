@@ -10,6 +10,7 @@
 
 NSString *const DHTextShadowAttributeName = @"DHTextShadowAttribute";
 NSString *const DHTextAttachmentAttributeName = @"DHTextAttachmentAttribute";
+NSString *const DHTextGlyphTransformAttributeName = @"DHTextGlyphTransformAttributeName";
 
 NSString *const DHTextAttachmentToken = @"\uFFFC";
 NSString *const DHTextTruncationToken = @"\u2026";
