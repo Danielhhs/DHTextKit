@@ -50,7 +50,7 @@
     DHTextBorder *border = [DHTextBorder borderWithLineStyle:DHTextLineStyleSingle strokeWidth:2 strokeColor:[UIColor redColor]];
     border.cornerRadius = 5;
     border.strokeWidth = 1;
-    border.lineStyle = DHTextLineStyleDouble;
+    border.lineStyle = DHTextLineStyleThick | DHTextLineStylePatternSolid;
     border.insets = UIEdgeInsetsMake(0, -3, 0, -3);
     [attrStr setBackgroundBorder:border];
     [attrStr setLineBreakMode:NSLineBreakByCharWrapping];

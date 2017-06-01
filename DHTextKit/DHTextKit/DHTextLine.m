@@ -290,12 +290,11 @@
             CGContextEOClip(context);
         }
         [border.strokeColor setStroke];
+        [self updateLinePatternForBorder:border inContext:context phase:0];
         CGFloat inset = -border.strokeWidth * 0.5;
         if ((border.lineStyle & 0xFF) == DHTextLineStyleThick) {
             inset *= 2;
             CGContextSetLineWidth(context, border.strokeWidth * 2);
-        } else {
-            CGContextSetLineWidth(context, border.strokeWidth);
         }
         CGFloat radiusDelta = -inset;   //inset is a negtive value, because the border should be larger than the text rect
         if (border.cornerRadius <= 0) {
@@ -313,7 +312,7 @@
         CGContextStrokePath(context);
         CGContextRestoreGState(context);
         
-        if ((border.lineStyle & 0xFF) == DHTextLineStyleDouble) {
+        if ((border.lineStyle & 0xFF) == DHTextLineStyleDouble) {       //Draw double line
             CGContextSaveGState(context);
             CGFloat inset = -border.strokeWidth * 2;
             for (NSValue *value in rects) {
@@ -329,6 +328,7 @@
                 CGContextAddPath(context, path.CGPath);
                 CGContextEOClip(context);
             }
+            [self updateLinePatternForBorder:border inContext:context phase:0];
             CGContextSetStrokeColorWithColor(context, border.strokeColor.CGColor);
             CGContextSetLineJoin(context, border.lineJoin);
             CGContextSetLineWidth(context, border.strokeWidth);
@@ -352,6 +352,39 @@
     if (shadow.color) {
         CGContextEndTransparencyLayer(context);
         CGContextRestoreGState(context);
+    }
+}
+
+- (void) updateLinePatternForBorder:(DHTextBorder *)border
+                          inContext:(CGContextRef)context
+                              phase:(CGFloat)phase
+{
+    CGContextSetLineWidth(context, border.strokeWidth);
+    CGContextSetLineCap(context, kCGLineCapButt);
+    CGContextSetLineJoin(context, kCGLineJoinMiter);
+    
+    CGFloat dash = 12, dot = 5, space = 3;
+    CGFloat width = border.strokeWidth;
+    NSUInteger pattern = (border.lineStyle & 0xF00);
+    if (pattern == DHTextLineStylePatternSolid) {
+        CGContextSetLineDash(context, phase, NULL, 0);
+    } else if (pattern == DHTextLineStylePatternDot) {
+        CGFloat lengths[2] = {width * dot, width * space};
+        CGContextSetLineDash(context, phase, lengths, 2);
+    } else if (pattern == DHTextLineStylePatternDash) {
+        CGFloat lengths[2] = {width * dash, width * space};
+        CGContextSetLineDash(context, phase, lengths, 2);
+    } else if (pattern == DHTextLineStylePatternDashDot) {
+        CGFloat lengths[4] = {width * dash, width * space, width * dot, width * space};
+        CGContextSetLineDash(context, phase, lengths, 4);
+    } else if (pattern == DHTextLineStylePatternDashDotDot) {
+        CGFloat lengths[6] = {width * dash, width * space, width * dot, width * space, width * dot, width * space};
+        CGContextSetLineDash(context, phase, lengths, 6);
+    } else if (pattern == DHTextLineStylePatternCircleDot) {
+        CGFloat lengths[2] = {width * 0, width * 3};
+        CGContextSetLineDash(context, phase, lengths, 2);
+        CGContextSetLineCap(context, kCGLineCapRound);
+        CGContextSetLineJoin(context, kCGLineJoinRound);
     }
 }
 
