@@ -23,6 +23,7 @@
 @property (nonatomic) NSInteger maximumNumberOfRows;
 @property (nonatomic) DHTextTruncationType truncationType;
 @property (nonatomic, strong) NSAttributedString *truncationToken;
+@property (nonatomic) UIEdgeInsets textContainerInsets;
 
 //Paragraph styles
 @property (nonatomic) NSLineBreakMode lineBreakMode;

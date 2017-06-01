@@ -10,6 +10,7 @@
 #import "DHLabel.h"
 #import "NSAttributedString+DHText.h"
 #import "DHTextShadow.h"
+#import "DHTextBorder.h"
 
 @interface ViewController ()
 
@@ -24,7 +25,7 @@
     label.truncationType = DHTextTruncationTypeEnd;
     label.truncationToken = [[NSAttributedString alloc] initWithString:@"YES"];
 //    label.lineBreakMode = NSLineBreakByCharWrapping;
-    UIFont *font = [UIFont boldSystemFontOfSize:16];
+    UIFont *font = [UIFont boldSystemFontOfSize:30];
     UIColor *color = [UIColor whiteColor];
     NSShadow *shadow = [[NSShadow alloc] init];
     shadow.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
@@ -43,10 +44,17 @@
     NSAttributedString *tail = [[NSAttributedString alloc] initWithString:@"thing you want to sayladjlasdlasd" attributes:attributes];
     [attrStr appendAttributedString:tail];
     [attrStr appendAttributedString:attachment];
+    [attrStr setLineSpacing:10];
 //    [attrStr setStrokeColor:[UIColor blueColor]];
 //    [attrStr setStrokeWidth:@(5)];
+    DHTextBorder *border = [DHTextBorder borderWithLineStyle:DHTextLineStyleSingle strokeWidth:2 strokeColor:[UIColor redColor]];
+    border.cornerRadius = 5;
+    border.lineStyle = DHTextLineStyleThick;
+    border.insets = UIEdgeInsetsMake(0, -4, 0, -4);
+    [attrStr setBackgroundBorder:border];
     [attrStr setLineBreakMode:NSLineBreakByCharWrapping];
     label.attribtuedText = attrStr;
+    label.textContainerInsets = UIEdgeInsetsMake(5, 10, 5, 5);
     [label sizeToFit];
     [self.view addSubview:label];
     // Do any additional setup after loading the view, typically from a nib.

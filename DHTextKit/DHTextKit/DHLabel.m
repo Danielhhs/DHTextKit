@@ -101,6 +101,7 @@ static const CGFloat kMaxLabelHeight = 1000000;
         self.textContainer.maximumNumberOfRows = self.maximumNumberOfRows;
         self.textContainer.truncationType = self.truncationType;
         self.textContainer.truncationToken = self.truncationToken;
+        self.textContainer.insets = self.textContainerInsets;
         self.layout = [DHTextLayout layoutWithContainer:self.textContainer
                                                    text:[self attributedStringToDraw]];
         [self setNeedsDisplay];

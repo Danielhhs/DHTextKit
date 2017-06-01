@@ -8,12 +8,6 @@
 
 #import "DHTextContainer.h"
 
-@interface DHTextContainer ()
-@property (nonatomic, readwrite) CGSize size;
-@property (nonatomic, readwrite) UIEdgeInsets insets;
-@property (nonatomic, readwrite, strong) UIBezierPath *path;
-@end
-
 @implementation DHTextContainer
 
 + (DHTextContainer *) containerWithPath:(UIBezierPath *)path

@@ -10,6 +10,7 @@
 #import "DHTextUtils.h"
 #import "DHTextAttribute.h"
 #import "DHTextShadow.h"
+#import "DHTextBorder.h"
 
 @interface DHTextLine () {
     CGFloat _firstGlyphPos;
@@ -36,6 +37,7 @@
 @property (nonatomic) BOOL needToDrawAttachment;
 @property (nonatomic) BOOL needToDrawInnerShadow;
 @property (nonatomic) BOOL needToDrawText;
+@property (nonatomic) BOOL needToDrawBackgroundBorder;
 @end
 
 @implementation DHTextLine
@@ -196,10 +198,121 @@
                 inView:(UIView *)view
                orLayer:(CALayer *)layer
 {
+    [self drawBorderInContext:context size:size position:position type:DHTextBorderTypeBackground];
     [self drawShadowInContext:context size:size position:position];
     [self drawTextInContext:context size:size position:position];
     [self drawInnerShadowInContext:context size:size position:position];
     [self drawAttachmentsInContext:context size:size position:position inView:view orLayer:layer];
+}
+
+- (void) drawBorderInContext:(CGContextRef)context
+                        size:(CGSize)size
+                    position:(CGPoint)position
+                        type:(DHTextBorderType)type
+{
+    CGFloat linePosX = self.position.x;
+    CGFloat linePosY = size.height - self.position.y;
+    CGContextSaveGState(context);
+    NSString *attributeKey = (type == DHTextBorderTypeNormal ? DHTextBorderAttributeName : DHTextBackgroundBorderAttributeName);
+    CFArrayRef runs = CTLineGetGlyphRuns(self.ctLine);
+    CFIndex runCount = CFArrayGetCount(runs);
+    CFRange lineRange = CTLineGetStringRange(self.ctLine);
+    for (CFIndex runNo = 0; runNo < runCount; runNo++) {
+        CTRunRef run = CFArrayGetValueAtIndex(runs, runNo);
+        CFIndex glyphCount = CTRunGetGlyphCount(run);
+        if (glyphCount == 0) {
+            continue;
+        }
+        
+        NSDictionary *attributes = (id)CTRunGetAttributes(run);
+        DHTextBorder *border = attributes[attributeKey];
+        if (!border) continue;
+        
+        CFRange textRange = CTRunGetStringRange(run);
+        if (textRange.location == kCFNotFound || textRange.length == 0) continue;
+        if (textRange.location + textRange.length > lineRange.location + lineRange.length) continue;
+        
+        NSMutableArray *runRects = [NSMutableArray array];
+        CGPoint runPosition = CGPointZero;
+        CTRunGetPositions(run, CFRangeMake(0, 1), &runPosition);
+        CGFloat ascent, descent;
+        CGFloat width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, NULL);
+        runPosition.x += linePosX;
+        CGRect boundingRect = CGRectMake(runPosition.x, linePosY - descent, width, ascent + descent);
+        [runRects addObject:[NSValue valueWithCGRect:boundingRect]];
+        [self drawBorder:border inRects:runRects inContext:context size:size position:position];
+    }
+    CGContextRestoreGState(context);
+}
+
+- (void) drawBorder:(DHTextBorder *)border
+            inRects:(NSArray *)rects
+          inContext:(CGContextRef)context
+               size:(CGSize)size
+           position:(CGPoint)position
+{
+    if ([rects count] == 0) return;
+    
+    DHTextShadow *shadow = border.shadow;
+    if (shadow.color) {
+        CGContextSaveGState(context);
+        CGContextSetShadowWithColor(context, shadow.offset, shadow.radius, shadow.color.CGColor);
+        CGContextBeginTransparencyLayer(context, NULL);
+    }
+    
+    NSMutableArray *paths = [NSMutableArray array];
+    for (NSValue *value in rects) {
+        CGRect rect = [value CGRectValue];
+        rect = UIEdgeInsetsInsetRect(rect, border.insets);
+        UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:border.cornerRadius];
+        [path closePath];
+        [paths addObject:path];
+    }
+    
+    if (border.fillColor) {
+        CGContextSaveGState(context);
+        CGContextSetFillColorWithColor(context, border.fillColor.CGColor);
+        for (UIBezierPath *path in paths) {
+            CGContextAddPath(context, path.CGPath);
+        }
+        CGContextFillPath(context);
+        CGContextRestoreGState(context);
+    }
+    
+    if (border.strokeColor && border.lineStyle > 0 && border.strokeWidth > 0) {
+        //Draw Single line;
+        CGContextSaveGState(context);
+        for (UIBezierPath *path in paths) {
+            CGRect bounds = CGRectUnion(path.bounds, CGRectMake(0, 0, size.width, size.height));
+            bounds = CGRectInset(bounds, -2 * border.strokeWidth, -2 * border.strokeWidth);
+            CGContextAddRect(context, bounds);
+            CGContextAddPath(context, path.CGPath);
+            CGContextEOClip(context);
+        }
+        [border.strokeColor setStroke];
+        CGFloat inset = -border.strokeWidth * 0.5;
+        if ((border.lineStyle & 0xFF) == DHTextLineStyleThick) {
+            inset *= 2;
+            CGContextSetLineWidth(context, border.strokeWidth * 2);
+        } else {
+            CGContextSetLineWidth(context, border.strokeWidth);
+        }
+        CGFloat radiusDelta = -inset;   //inset is a negtive value, because the border should be larger than the text rect
+        if (border.cornerRadius <= 0) {
+            radiusDelta = 0;
+        }
+        CGContextSetLineJoin(context, border.lineJoin);
+        for (NSValue *value in rects) {
+            CGRect rect = [value CGRectValue];
+            rect = UIEdgeInsetsInsetRect(rect, border.insets);
+            rect = CGRectInset(rect, inset, inset);
+            UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:border.cornerRadius + radiusDelta];
+            [path closePath];
+            CGContextAddPath(context, path.CGPath);
+        }
+        CGContextStrokePath(context);
+        CGContextRestoreGState(context);
+    }
 }
 
 - (void) drawShadowInContext:(CGContextRef)context

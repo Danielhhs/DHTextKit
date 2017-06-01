@@ -306,4 +306,14 @@
     [self setAttribute:DHTextAttachmentAttributeName value:textAttachment range:range];
 }
 
+- (void) setBackgroundBorder:(DHTextBorder *)border
+{
+    [self setBackgroundBorder:border forRange:NSMakeRange(0, [self length])];
+}
+
+- (void) setBackgroundBorder:(DHTextBorder *)border forRange:(NSRange)range
+{
+    [self setAttribute:DHTextBackgroundBorderAttributeName value:border range:range];
+}
+
 @end

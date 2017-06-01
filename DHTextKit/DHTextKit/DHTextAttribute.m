@@ -12,6 +12,8 @@ NSString *const DHTextInnerShadowAttributeName = @"DHTextInnerShadowAttribute";
 NSString *const DHTextShadowAttributeName = @"DHTextShadowAttribute";
 NSString *const DHTextAttachmentAttributeName = @"DHTextAttachmentAttribute";
 NSString *const DHTextGlyphTransformAttributeName = @"DHTextGlyphTransformAttributeName";
+NSString *const DHTextBorderAttributeName = @"DHTextGlyphTransformAttributeName";
+NSString *const DHTextBackgroundBorderAttributeName = @"DHTextBackgroundBorderAttributeName";
 
 NSString *const DHTextAttachmentToken = @"\uFFFC";
 NSString *const DHTextTruncationToken = @"\u2026";
