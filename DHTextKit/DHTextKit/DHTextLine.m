@@ -312,6 +312,46 @@
         }
         CGContextStrokePath(context);
         CGContextRestoreGState(context);
+        
+        if ((border.lineStyle & 0xFF) == DHTextLineStyleDouble) {
+            CGContextSaveGState(context);
+            CGFloat inset = -border.strokeWidth * 2;
+            for (NSValue *value in rects) {
+                CGRect rect = [value CGRectValue];
+                rect = UIEdgeInsetsInsetRect(rect, border.insets);
+                rect = CGRectInset(rect, inset, inset);
+                UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:border.cornerRadius + 2 *border.strokeWidth];
+                [path closePath];
+                
+                CGRect bounds = CGRectUnion(path.bounds, (CGRect){CGPointZero, size});
+                bounds = CGRectInset(bounds, -2 * border.strokeWidth, -2 * border.strokeWidth);
+                CGContextAddRect(context, bounds);
+                CGContextAddPath(context, path.CGPath);
+                CGContextEOClip(context);
+            }
+            CGContextSetStrokeColorWithColor(context, border.strokeColor.CGColor);
+            CGContextSetLineJoin(context, border.lineJoin);
+            CGContextSetLineWidth(context, border.strokeWidth);
+            inset = -border.strokeWidth * 2.5;
+            radiusDelta = border.strokeWidth * 2;
+            if (border.cornerRadius <= 0) {
+                radiusDelta = 0;
+            }
+            for (NSValue *value in rects) {
+                CGRect rect = [value CGRectValue];
+                rect = UIEdgeInsetsInsetRect(rect, border.insets);
+                rect = CGRectInset(rect, inset, inset);
+                UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:border.cornerRadius + border.strokeWidth];
+                [path closePath];
+                CGContextAddPath(context, path.CGPath);
+            }
+            CGContextStrokePath(context);
+            CGContextRestoreGState(context);
+        }
+    }
+    if (shadow.color) {
+        CGContextEndTransparencyLayer(context);
+        CGContextRestoreGState(context);
     }
 }
 
