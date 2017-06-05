@@ -14,11 +14,29 @@
 
 static const CGFloat kMaxLabelHeight = 1000000;
 
-@interface DHLabel ()<DHAsyncDisplayLayerDelegate>
+@interface DHLabel ()<DHAsyncDisplayLayerDelegate> {
+    struct {
+        unsigned int layoutNeedUpdate : 1;
+        unsigned int showingHighlight : 1;
+        
+        unsigned int trackingTouch : 1;
+        unsigned int swallowTouch : 1;
+        unsigned int touchMoved : 1;
+        
+        unsigned int hasTapAction : 1;
+        unsigned int hasLongPressAction : 1;
+        
+        unsigned int contentsNeedFade : 1;
+    } _state;
+}
 @property (nonatomic, strong) DHTextLayout *layout;
 @property (nonatomic, strong) DHTextContainer *textContainer;
 @property (nonatomic) BOOL needsToUpdateLayout;
+@property (nonatomic) CGPoint touchBeginPoint;
 @end
+
+#define kLongPressMinimumDuration 0.5
+#define kLongPressMovementThreshold 9.0
 
 @implementation DHLabel
 
@@ -53,7 +71,7 @@ static const CGFloat kMaxLabelHeight = 1000000;
     return [DHAsyncDisplayLayer class];
 }
 #pragma mark - Update Properties
-- (NSAttributedString *) attributedStringToDraw
+- (NSAttributedString *) _attributedStringToDraw
 {
     if (self.attribtuedText) {
         return self.attribtuedText;
@@ -72,28 +90,28 @@ static const CGFloat kMaxLabelHeight = 1000000;
 - (void) setAttribtuedText:(NSAttributedString *)attribtuedText
 {
     _attribtuedText = attribtuedText;
-    [self setNeedsToUpdateLayout];
+    [self _setNeedsToUpdateLayout];
 }
 
 - (void) setBounds:(CGRect)bounds
 {
     [super setBounds:bounds];
-    [self setNeedsToUpdateLayout];
+    [self _setNeedsToUpdateLayout];
 }
 
 - (void) setFrame:(CGRect)frame
 {
     [super setFrame:frame];
-    [self setNeedsToUpdateLayout];
+    [self _setNeedsToUpdateLayout];
 }
 
-- (void) setNeedsToUpdateLayout
+- (void) _setNeedsToUpdateLayout
 {
     self.needsToUpdateLayout = YES;
     [self setNeedsDisplay];
 }
 
-- (void) updateLayoutIfNeeds
+- (void) _updateLayoutIfNeeds
 {
     if (self.needsToUpdateLayout) {
         self.needsToUpdateLayout = NO;
@@ -103,7 +121,7 @@ static const CGFloat kMaxLabelHeight = 1000000;
         self.textContainer.truncationToken = self.truncationToken;
         self.textContainer.insets = self.textContainerInsets;
         self.layout = [DHTextLayout layoutWithContainer:self.textContainer
-                                                   text:[self attributedStringToDraw]];
+                                                   text:[self _attributedStringToDraw]];
         [self setNeedsDisplay];
     }
 }
@@ -116,7 +134,7 @@ static const CGFloat kMaxLabelHeight = 1000000;
 
 - (void) sizeToFit
 {
-    [self updateLayoutIfNeeds];
+    [self _updateLayoutIfNeeds];
     self.bounds = self.layout.textBoundingRect;
 }
 
@@ -134,16 +152,6 @@ static const CGFloat kMaxLabelHeight = 1000000;
     return layout.textBoundingRect;
 }
 
-#pragma mark - Drawing
-//- (void)drawRect:(CGRect)rect {
-//    [self.layout drawInContext:UIGraphicsGetCurrentContext()
-//                          size:self.bounds.size
-//                         point:CGPointZero
-//                          view:self
-//                         layer:nil
-//                        cancel:nil];
-//}
-
 #pragma mark - DHAsyncDisplayLayerDelegate
 - (DHAsyncDisplayTask *) asyncDisplayTask
 {
@@ -153,11 +161,63 @@ static const CGFloat kMaxLabelHeight = 1000000;
     };
     
     task.display = ^(CGContextRef context, CGSize size) {
-        [self updateLayoutIfNeeds];
+        [self _updateLayoutIfNeeds];
         [self.layout drawInContext:context size:size point:CGPointZero view:self layer:self.layer cancel:nil];
     };
     
     task.didDisplay = nil;
     return task;
+}
+
+#pragma mark - Event Handling
+- (void) touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    [self _updateLayoutIfNeeds];
+    UITouch *touch = [touches anyObject];
+    CGPoint point = [touch locationInView:self];
+    if (_tapAction || _longPressAction) {
+        _touchBeginPoint = point;
+        _state.trackingTouch = YES;
+        _state.swallowTouch = YES;
+        _state.touchMoved = NO;
+        [self _startLongPressTimer];
+    } else {
+        _state.trackingTouch = NO;
+        _state.swallowTouch = NO;
+        _state.touchMoved = NO;
+    }
+    if (!_state.swallowTouch) {
+        [super touchesBegan:touches withEvent:event];
+    }
+}
+
+- (void) touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    [self _updateLayoutIfNeeds];
+    UITouch *touch = [touches anyObject];
+    CGPoint point = [touch locationInView:self];
+    
+    if (_state.trackingTouch) {
+        if (!_state.touchMoved) {
+            CGFloat moveX = point.x - _touchBeginPoint.x;
+            CGFloat moveY = point.y - _touchBeginPoint.y;
+            if (MAX(fabs(moveX), fabs(moveY)) > kLongPressMovementThreshold) {
+                _state.touchMoved = YES;
+            }
+            if (_state.touchMoved) {
+                [self _endLongpressTimer];
+            }
+        }
+    }
+}
+
+- (void) _startLongPressTimer
+{
+    
+}
+
+- (void) _endLongpressTimer
+{
+    
 }
 @end

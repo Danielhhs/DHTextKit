@@ -316,4 +316,14 @@
     [self setAttribute:DHTextBackgroundBorderAttributeName value:border range:range];
 }
 
+- (void) setTextUnderline:(DHTextDecoration *)underline
+{
+    [self setTextUnderline:underline forRange:NSMakeRange(0, [self length])];
+}
+
+- (void) setTextUnderline:(DHTextDecoration *)underline forRange:(NSRange)range
+{
+    [self setAttribute:DHTextUnderlineAttributeName value:underline range:range];
+}
+
 @end

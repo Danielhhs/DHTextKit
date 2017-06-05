@@ -23,6 +23,7 @@
 		54A562D91EDAFBE400AE44D4 /* DHAsyncDisplayLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A562D81EDAFBE400AE44D4 /* DHAsyncDisplayLayer.m */; };
 		54A562DF1EDE6C8B00AE44D4 /* NSParagraphStyle+DHText.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A562DE1EDE6C8B00AE44D4 /* NSParagraphStyle+DHText.m */; };
 		54A562E21EDEC75F00AE44D4 /* DHTextBorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A562E11EDEC75F00AE44D4 /* DHTextBorder.m */; };
+		54A562E51EE4FA9000AE44D4 /* DHTextDecoration.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A562E41EE4FA9000AE44D4 /* DHTextDecoration.m */; };
 		54CE9E7F1ED67E1A00F905D6 /* DHTextShadow.m in Sources */ = {isa = PBXBuildFile; fileRef = 54CE9E7E1ED67E1A00F905D6 /* DHTextShadow.m */; };
 		54CE9E821ED68C9C00F905D6 /* DHTextAttribute.m in Sources */ = {isa = PBXBuildFile; fileRef = 54CE9E811ED68C9C00F905D6 /* DHTextAttribute.m */; };
 		54CE9E851ED6B51000F905D6 /* NSAttributedString+DHText.m in Sources */ = {isa = PBXBuildFile; fileRef = 54CE9E841ED6B51000F905D6 /* NSAttributedString+DHText.m */; };
@@ -81,6 +82,8 @@
 		54A562DE1EDE6C8B00AE44D4 /* NSParagraphStyle+DHText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSParagraphStyle+DHText.m"; sourceTree = "<group>"; };
 		54A562E01EDEC75F00AE44D4 /* DHTextBorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DHTextBorder.h; sourceTree = "<group>"; };
 		54A562E11EDEC75F00AE44D4 /* DHTextBorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DHTextBorder.m; sourceTree = "<group>"; };
+		54A562E31EE4FA9000AE44D4 /* DHTextDecoration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DHTextDecoration.h; sourceTree = "<group>"; };
+		54A562E41EE4FA9000AE44D4 /* DHTextDecoration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DHTextDecoration.m; sourceTree = "<group>"; };
 		54CE9E7D1ED67E1A00F905D6 /* DHTextShadow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DHTextShadow.h; sourceTree = "<group>"; };
 		54CE9E7E1ED67E1A00F905D6 /* DHTextShadow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DHTextShadow.m; sourceTree = "<group>"; };
 		54CE9E801ED68C9C00F905D6 /* DHTextAttribute.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DHTextAttribute.h; sourceTree = "<group>"; };
@@ -212,6 +215,8 @@
 				54A562D81EDAFBE400AE44D4 /* DHAsyncDisplayLayer.m */,
 				54A562E01EDEC75F00AE44D4 /* DHTextBorder.h */,
 				54A562E11EDEC75F00AE44D4 /* DHTextBorder.m */,
+				54A562E31EE4FA9000AE44D4 /* DHTextDecoration.h */,
+				54A562E41EE4FA9000AE44D4 /* DHTextDecoration.m */,
 			);
 			path = DHTextKit;
 			sourceTree = "<group>";
@@ -357,6 +362,7 @@
 				54CE9E851ED6B51000F905D6 /* NSAttributedString+DHText.m in Sources */,
 				54CE9E821ED68C9C00F905D6 /* DHTextAttribute.m in Sources */,
 				54CE9E7F1ED67E1A00F905D6 /* DHTextShadow.m in Sources */,
+				54A562E51EE4FA9000AE44D4 /* DHTextDecoration.m in Sources */,
 				5472D5B71ED578CB0094ED87 /* DHTextLayout.m in Sources */,
 				5412F4061ED2EA1A00739A5C /* DHLabel.m in Sources */,
 				5472D5B11ED40D480094ED87 /* DHTextAttachment.m in Sources */,

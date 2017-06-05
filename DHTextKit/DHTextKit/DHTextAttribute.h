@@ -43,14 +43,30 @@ typedef NS_ENUM(NSInteger, DHTextBorderType) {
     DHTextBorderTypeNormal = 1 << 1,
 };
 
-UIKIT_EXTERN NSString *const DHTextShadowAttributeName;     //Value should be instance of DHTextShadow or NSShadow
-UIKIT_EXTERN NSString *const DHTextAttachmentAttributeName; //Value should be instance of DHTextAttachment
-UIKIT_EXTERN NSString *const DHTextInnerShadowAttributeName;    //Value should be instance of DHTextShadow
-UIKIT_EXTERN NSString *const DHTextGlyphTransformAttributeName; //Value should be instance of NSValue wrapping CGAffineTransform
-UIKIT_EXTERN NSString *const DHTextBorderAttributeName;     //Value should be instance of DHTextBorder
-UIKIT_EXTERN NSString *const DHTextBackgroundBorderAttributeName;     //Value should be instance of DHTextBorder
+typedef NS_ENUM(NSInteger, DHTextDecorationType) {
+    DHTextDecorationTypeUnderLine = 1 << 0,
+    DHTextDecorationTypeStrikeThrough = 1 << 1,
+};
 
-UIKIT_EXTERN NSString *const DHTextAttachmentToken; ///U+FFFC, used for text attachment.
-UIKIT_EXTERN NSString *const DHTextTruncationToken; ///U+2026, used for text truncation  "…"
+/**
+ * Call back for tap/longpress action on text views;
+ * @param containerView text container view, DHLabel or DHTextView
+ * @param text text in the container view
+ * @param range range in 'text'
+ * @param rect frame of the text in 'containerView'
+ */
+typedef void (^DHTextAction)( UIView * _Nonnull  containerView, NSAttributedString * _Nonnull text, NSRange range, CGRect rect);
+
+UIKIT_EXTERN NSString *_Nonnull const DHTextShadowAttributeName;     //Value should be instance of DHTextShadow or NSShadow
+UIKIT_EXTERN NSString *_Nonnull const DHTextAttachmentAttributeName; //Value should be instance of DHTextAttachment
+UIKIT_EXTERN NSString *_Nonnull const DHTextInnerShadowAttributeName;    //Value should be instance of DHTextShadow
+UIKIT_EXTERN NSString *_Nonnull const DHTextGlyphTransformAttributeName; //Value should be instance of NSValue wrapping CGAffineTransform
+UIKIT_EXTERN NSString *_Nonnull const DHTextBorderAttributeName;     //Value should be instance of DHTextBorder
+UIKIT_EXTERN NSString *_Nonnull const DHTextBackgroundBorderAttributeName;     //Value should be instance of DHTextBorder
+UIKIT_EXTERN NSString *_Nonnull const DHTextUnderlineAttributeName;             //Value should be instance of DHTextDecoration
+UIKIT_EXTERN NSString *_Nonnull const DHTextStrikeThroughAttributeName;         //Value should be instance of DHTextDecoration
+
+UIKIT_EXTERN NSString *_Nonnull const DHTextAttachmentToken; ///U+FFFC, used for text attachment.
+UIKIT_EXTERN NSString *_Nonnull const DHTextTruncationToken; ///U+2026, used for text truncation  "…"
 
 @end

@@ -11,6 +11,7 @@
 #import "NSAttributedString+DHText.h"
 #import "DHTextShadow.h"
 #import "DHTextBorder.h"
+#import "DHTextDecoration.h"
 
 @interface ViewController ()
 
@@ -21,7 +22,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     DHLabel *label = [[DHLabel alloc] initWithFrame:CGRectMake(100, 100, 200, 100)];
-    label.maximumNumberOfRows = 2;
+    label.maximumNumberOfRows = 1;
     label.truncationType = DHTextTruncationTypeEnd;
     label.truncationToken = [[NSAttributedString alloc] initWithString:@"YES"];
 //    label.lineBreakMode = NSLineBreakByCharWrapping;
@@ -52,7 +53,11 @@
     border.strokeWidth = 1;
     border.lineStyle = DHTextLineStyleThick | DHTextLineStylePatternSolid;
     border.insets = UIEdgeInsetsMake(0, -3, 0, -3);
+    
     [attrStr setBackgroundBorder:border];
+    
+    DHTextDecoration *underline = [DHTextDecoration decorationWithStyle:DHTextLineStyleSingle width:@(2) color:[UIColor blueColor]];
+    [attrStr setTextUnderline:underline forRange:NSMakeRange(0, 3)];
     [attrStr setLineBreakMode:NSLineBreakByCharWrapping];
     label.attribtuedText = attrStr;
     label.textContainerInsets = UIEdgeInsetsMake(5, 10, 5, 5);

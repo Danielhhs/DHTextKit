@@ -30,6 +30,9 @@
 @property (nonatomic) CGFloat lineSpacing;
 @property (nonatomic) CGFloat paragraphSpacing;
 
+@property (nonatomic, strong) DHTextAction tapAction;
+@property (nonatomic, strong) DHTextAction longPressAction;
+
 + (CGRect) textBoundingRectForAttributedString:(NSAttributedString *)attributedString
                                       maxWidth:(CGFloat)width;
 

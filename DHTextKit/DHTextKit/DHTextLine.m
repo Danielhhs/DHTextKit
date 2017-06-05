@@ -11,6 +11,7 @@
 #import "DHTextAttribute.h"
 #import "DHTextShadow.h"
 #import "DHTextBorder.h"
+#import "DHTextDecoration.h"
 
 @interface DHTextLine () {
     CGFloat _firstGlyphPos;
@@ -38,6 +39,7 @@
 @property (nonatomic) BOOL needToDrawInnerShadow;
 @property (nonatomic) BOOL needToDrawText;
 @property (nonatomic) BOOL needToDrawBackgroundBorder;
+@property (nonatomic) BOOL needToDrawUnderline;
 @end
 
 @implementation DHTextLine
@@ -181,6 +183,12 @@
         if (attribtues[DHTextInnerShadowAttributeName]) {
             self.needToDrawInnerShadow = YES;
         }
+        if (attribtues[DHTextBackgroundBorderAttributeName]) {
+            self.needToDrawBackgroundBorder = YES;
+        }
+        if (attribtues[DHTextUnderlineAttributeName]) {
+            self.needToDrawUnderline = YES;
+        }
     }
 }
 
@@ -200,9 +208,11 @@
 {
     [self drawBorderInContext:context size:size position:position type:DHTextBorderTypeBackground];
     [self drawShadowInContext:context size:size position:position];
+//    [self drawDecorationInContext:context size:size position:position type:DHTextDecorationTypeUnderLine];
     [self drawTextInContext:context size:size position:position];
     [self drawInnerShadowInContext:context size:size position:position];
     [self drawAttachmentsInContext:context size:size position:position inView:view orLayer:layer];
+    
 }
 
 - (void) drawBorderInContext:(CGContextRef)context
@@ -210,6 +220,9 @@
                     position:(CGPoint)position
                         type:(DHTextBorderType)type
 {
+    if (type == DHTextBorderTypeBackground && self.needToDrawBackgroundBorder == NO) {
+        return;
+    }
     CGFloat linePosX = self.position.x;
     CGFloat linePosY = size.height - self.position.y;
     CGContextSaveGState(context);
@@ -240,11 +253,27 @@
         runPosition.x += linePosX;
         CGRect boundingRect = CGRectMake(runPosition.x, linePosY - descent, width, ascent + descent);
         [runRects addObject:[NSValue valueWithCGRect:boundingRect]];
-        [self drawBorder:border inRects:runRects inContext:context size:size position:position];
+        
+        //Merge rects in the same line
+        NSMutableArray *drawRects = [NSMutableArray array];
+        CGRect currentRect = [[runRects firstObject] CGRectValue];
+        for (NSInteger rectNo = 0; rectNo < [runRects count]; rectNo++) {
+            CGRect rect = [runRects[rectNo] CGRectValue];
+            if (fabs(rect.origin.y - currentRect.origin.y) < 1) {
+                currentRect = [DHTextUtils mergeRect:rect withRect:currentRect isVertical:NO];
+            } else {
+                [drawRects addObject:[NSValue valueWithCGRect:currentRect]];
+            }
+        }
+        if (!CGRectEqualToRect(currentRect, CGRectZero)) {
+            [drawRects addObject:[NSValue valueWithCGRect:currentRect]];
+        }
+        [self drawBorder:border inRects:drawRects inContext:context size:size position:position];
     }
     CGContextRestoreGState(context);
 }
 
+#pragma mark - Draw Border
 - (void) drawBorder:(DHTextBorder *)border
             inRects:(NSArray *)rects
           inContext:(CGContextRef)context
@@ -290,7 +319,7 @@
             CGContextEOClip(context);
         }
         [border.strokeColor setStroke];
-        [self updateLinePatternForBorder:border inContext:context phase:0];
+        [self updateLinePatternForStyle:border.lineStyle lineWidth:border.strokeWidth inContext:context phase:0];
         CGFloat inset = -border.strokeWidth * 0.5;
         if ((border.lineStyle & 0xFF) == DHTextLineStyleThick) {
             inset *= 2;
@@ -328,7 +357,7 @@
                 CGContextAddPath(context, path.CGPath);
                 CGContextEOClip(context);
             }
-            [self updateLinePatternForBorder:border inContext:context phase:0];
+            [self updateLinePatternForStyle:border.lineStyle lineWidth:border.strokeWidth inContext:context phase:0];
             CGContextSetStrokeColorWithColor(context, border.strokeColor.CGColor);
             CGContextSetLineJoin(context, border.lineJoin);
             CGContextSetLineWidth(context, border.strokeWidth);
@@ -355,17 +384,18 @@
     }
 }
 
-- (void) updateLinePatternForBorder:(DHTextBorder *)border
+- (void) updateLinePatternForStyle:(DHTextLineStyle)style
+                         lineWidth:(CGFloat) lineWidth
                           inContext:(CGContextRef)context
                               phase:(CGFloat)phase
 {
-    CGContextSetLineWidth(context, border.strokeWidth);
+    CGContextSetLineWidth(context, lineWidth);
     CGContextSetLineCap(context, kCGLineCapButt);
     CGContextSetLineJoin(context, kCGLineJoinMiter);
     
     CGFloat dash = 12, dot = 5, space = 3;
-    CGFloat width = border.strokeWidth;
-    NSUInteger pattern = (border.lineStyle & 0xF00);
+    CGFloat width = lineWidth;
+    NSUInteger pattern = (style & 0xF00);
     if (pattern == DHTextLineStylePatternSolid) {
         CGContextSetLineDash(context, phase, NULL, 0);
     } else if (pattern == DHTextLineStylePatternDot) {
@@ -388,6 +418,7 @@
     }
 }
 
+#pragma mark - Draw Shadow
 - (void) drawShadowInContext:(CGContextRef)context
                         size:(CGSize)size
                     position:(CGPoint)position
@@ -427,83 +458,6 @@
             }
             CGContextRestoreGState(context);
             shadow = shadow.subShadow;
-        }
-    }
-    
-}
-
-- (void) drawTextInContext:(CGContextRef)context
-                      size:(CGSize)size
-                  position:(CGPoint)position
-{
-    if (self.needToDrawText == NO) {
-        return;
-    }
-    CGPoint lineOrigin;
-    lineOrigin.x = self.position.x;
-    lineOrigin.y = self.position.y;
-    CFArrayRef runs = CTLineGetGlyphRuns(self.ctLine);
-    CFIndex numberOfRuns = CFArrayGetCount(runs);
-    for (CFIndex runNo = 0; runNo < numberOfRuns; runNo++) {
-        CTRunRef run = CFArrayGetValueAtIndex(runs, runNo);
-        CGContextSetTextMatrix(context, CGAffineTransformIdentity);
-        CGContextSetTextPosition(context, lineOrigin.x, size.height - lineOrigin.y);
-        CTRunDraw(run, context, [DHTextUtils emptyCFRange]);
-    }
-}
-
-- (void) drawAttachmentsInContext:(CGContextRef)context
-                             size:(CGSize)size
-                         position:(CGPoint)position
-                           inView:(UIView *)targetView
-                          orLayer:(CALayer *)targetLayer
-{
-    if (self.needToDrawAttachment == NO) {
-        return;
-    }
-    for (NSInteger i = 0; i < [self.attachments count]; i++) {
-        DHTextAttachment *attachment = self.attachments[i];
-        if (attachment.content == nil) {
-            return;
-        }
-        
-        UIView *view = nil;
-        UIImage *image = nil;
-        CALayer *layer = nil;
-        if ([attachment.content isKindOfClass:[UIImage class]]) {
-            image = (UIImage *)attachment.content;
-        } else if ([attachment.content isKindOfClass:[UIView class]]) {
-            view = (UIView *)attachment.content;
-        } else if ([attachment.content isKindOfClass:[CALayer class]]) {
-            layer = (CALayer *)attachment.content;
-        }
-        
-        if (!image && !view && !layer) continue;
-        if (image && !context) continue;
-        if (view && !targetView) continue;
-        if (layer && !targetLayer) continue;
-        
-        CGRect rect = [((NSValue *)self.attachmentRects[i]) CGRectValue];
-        rect = UIEdgeInsetsInsetRect(rect, attachment.contentInsets);
-        rect = CGRectStandardize(rect);
-        rect.origin.x += position.x;
-        rect.origin.y += position.y;
-        
-        if (image) {
-            CGImageRef imageRef = image.CGImage;
-            if (imageRef) {
-                CGContextSaveGState(context);
-                CGContextTranslateCTM(context, 0, size.height);   //minY: move to the rect system, maxY: flip around;
-                CGContextScaleCTM(context, 1, -1);
-                CGContextDrawImage(context, rect, imageRef);
-                CGContextRestoreGState(context);
-            }
-        } else if (view) {
-            view.frame = rect;
-            [targetView addSubview:view];
-        } else if (layer) {
-            layer.frame = rect;
-            [targetLayer addSublayer:layer];
         }
     }
 }
@@ -567,5 +521,229 @@
             shadow = shadow.subShadow;
         }
     }
+}
+
+
+#pragma mark - Draw Text
+- (void) drawTextInContext:(CGContextRef)context
+                      size:(CGSize)size
+                  position:(CGPoint)position
+{
+    if (self.needToDrawText == NO) {
+        return;
+    }
+    CGPoint lineOrigin;
+    lineOrigin.x = self.position.x;
+    lineOrigin.y = self.position.y;
+    CFArrayRef runs = CTLineGetGlyphRuns(self.ctLine);
+    CFIndex numberOfRuns = CFArrayGetCount(runs);
+    for (CFIndex runNo = 0; runNo < numberOfRuns; runNo++) {
+        CTRunRef run = CFArrayGetValueAtIndex(runs, runNo);
+        CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+        CGContextSetTextPosition(context, lineOrigin.x, size.height - lineOrigin.y);
+        CTRunDraw(run, context, [DHTextUtils emptyCFRange]);
+    }
+}
+
+#pragma mark - Draw Attachment
+- (void) drawAttachmentsInContext:(CGContextRef)context
+                             size:(CGSize)size
+                         position:(CGPoint)position
+                           inView:(UIView *)targetView
+                          orLayer:(CALayer *)targetLayer
+{
+    if (self.needToDrawAttachment == NO) {
+        return;
+    }
+    for (NSInteger i = 0; i < [self.attachments count]; i++) {
+        DHTextAttachment *attachment = self.attachments[i];
+        if (attachment.content == nil) {
+            return;
+        }
+        
+        UIView *view = nil;
+        UIImage *image = nil;
+        CALayer *layer = nil;
+        if ([attachment.content isKindOfClass:[UIImage class]]) {
+            image = (UIImage *)attachment.content;
+        } else if ([attachment.content isKindOfClass:[UIView class]]) {
+            view = (UIView *)attachment.content;
+        } else if ([attachment.content isKindOfClass:[CALayer class]]) {
+            layer = (CALayer *)attachment.content;
+        }
+        
+        if (!image && !view && !layer) continue;
+        if (image && !context) continue;
+        if (view && !targetView) continue;
+        if (layer && !targetLayer) continue;
+        
+        CGRect rect = [((NSValue *)self.attachmentRects[i]) CGRectValue];
+        rect = UIEdgeInsetsInsetRect(rect, attachment.contentInsets);
+        rect = CGRectStandardize(rect);
+        rect.origin.x += position.x;
+        rect.origin.y += position.y;
+        
+        if (image) {
+            CGImageRef imageRef = image.CGImage;
+            if (imageRef) {
+                CGContextSaveGState(context);
+                CGContextTranslateCTM(context, 0, size.height);   //minY: move to the rect system, maxY: flip around;
+                CGContextScaleCTM(context, 1, -1);
+                CGContextDrawImage(context, rect, imageRef);
+                CGContextRestoreGState(context);
+            }
+        } else if (view) {
+            view.frame = rect;
+            [targetView addSubview:view];
+        } else if (layer) {
+            layer.frame = rect;
+            [targetLayer addSublayer:layer];
+        }
+    }
+}
+
+#pragma mark - Draw Decoration
+- (void) drawDecorationInContext:(CGContextRef)context
+                            size:(CGSize)size
+                        position:(CGPoint)position
+                            type:(DHTextDecorationType)type
+{
+    if (type == DHTextDecorationTypeUnderLine && self.needToDrawUnderline == NO) {
+        return ;
+    }
+    CGContextSaveGState(context);
+    CFArrayRef runs = CTLineGetGlyphRuns(self.ctLine);
+    CFIndex runCount = CFArrayGetCount(runs);
+    
+    CGFloat xHeight, underlinePosition, lineThickness;
+    [self getXHeight:&xHeight underlinePosition:&underlinePosition lineThickness:&lineThickness forRuns:runs];
+    
+    for (CFIndex runNo = 0; runNo < runCount; runNo++) {
+        CTRunRef run = CFArrayGetValueAtIndex(runs, runNo);
+        CFIndex glyphCount = CTRunGetGlyphCount(run);
+        if (glyphCount == 0) return;
+        
+        NSDictionary *attributes = (id)CTRunGetAttributes(run);
+        DHTextDecoration *underline = attributes[DHTextUnderlineAttributeName];
+        DHTextDecoration *strikeThrough = attributes[DHTextStrikeThroughAttributeName];
+        if (type == DHTextDecorationTypeUnderLine && underline == nil) continue;
+        if (type == DHTextDecorationTypeStrikeThrough && underline == nil) continue;
+        CFRange runRange = CTRunGetStringRange(run);
+        if (runRange.location == kCFNotFound || runRange.length == 0) continue;
+        if (runRange.location + runRange.length > self.range.location + self.range.length) continue;
+        
+        CGPoint underlineStart, strikeThroughStart;
+        CGFloat length;
+        underlineStart.y = self.position.y + underlinePosition;
+        strikeThroughStart.y = self.position.y + xHeight / 2;
+        CGPoint runPosition = CGPointZero;
+        CTRunGetPositions(run, CFRangeMake(0, 0), &runPosition);
+        underlineStart.x = strikeThroughStart.x = runPosition.x + self.position.x;
+        length = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), NULL, NULL, NULL);
+        
+        if (type == DHTextDecorationTypeUnderLine) {
+            CGColorRef color = underline.color.CGColor;
+            if (color == NULL) {
+                color = (__bridge CGColorRef)(attributes[(id)kCTForegroundColorAttributeName]);
+                color = [DHTextUtils defaultColor].CGColor;
+            }
+            CGFloat thickness = underline.width ? [underline.width doubleValue] : lineThickness;
+            DHTextShadow *shadow = underline.shadow;
+            while (shadow) {
+                if (!shadow.color) {
+                    shadow = shadow.subShadow;
+                    continue;
+                }
+                CGFloat offsetAlterX = size.width + 0xFFFF;
+                CGContextSaveGState(context); {
+                    CGSize offset = shadow.offset;
+                    offset.width -= offsetAlterX;
+                    CGContextSaveGState(context); {
+                        CGContextSetShadowWithColor(context, offset, shadow.radius, [shadow.color CGColor]);
+                        CGContextSetBlendMode(context, shadow.blendMode);
+                        CGContextTranslateCTM(context, offsetAlterX, 0);
+                        [self drawLineInContext:context length:length thickness:thickness lineStyle:underline.style start:underlineStart color:color];
+                    }CGContextRestoreGState(context);
+                } CGContextRestoreGState(context);
+                shadow = shadow.subShadow;
+            }
+            [self drawLineInContext:context length:length thickness:thickness lineStyle:underline.style start:underlineStart color:color];
+        }
+    }
+    CGContextRestoreGState(context);
+}
+
+- (void) drawLineInContext:(CGContextRef) context
+                    length:(CGFloat) length
+                 thickness:(CGFloat) thickness
+                 lineStyle:(DHTextLineStyle)style
+                     start:(CGPoint)startPoint
+                     color:(CGColorRef)color
+{
+    NSUInteger baseStyle = style & 0xFF;
+    if (baseStyle == 0) return;
+    
+    CGContextSaveGState(context); {
+        CGFloat x1, x2, y, lineWidth;
+        x1 = [DHTextUtils CGFloatPixelRound:startPoint.x];
+        x2 = [DHTextUtils CGFloatPixelRound:startPoint.x + length];
+        lineWidth = (baseStyle == DHTextLineStyleThick) ? thickness * 2 : thickness;
+        
+        CGFloat linePixel = [DHTextUtils CGFloatToPixel:lineWidth];
+        if (fabs(linePixel - floor(linePixel)) < 0.1) {
+            int iPixel = linePixel;
+            if (iPixel == 0 || (iPixel % 2) != 0) {
+                y = [DHTextUtils CGFloatPixelHalf:startPoint.y];
+            } else {
+                y = [DHTextUtils CGFloatPixelFloor:startPoint.y];
+            }
+        } else {
+            y = startPoint.y;
+        }
+        CGContextSetStrokeColorWithColor(context, color);
+        [self updateLinePatternForStyle:style lineWidth:thickness inContext:context phase:startPoint.x];
+        CGContextSetLineWidth(context, lineWidth);
+        if (baseStyle == DHTextLineStyleSingle || baseStyle == DHTextLineStyleThick) {
+            CGContextMoveToPoint(context, x1, y);
+            CGContextAddLineToPoint(context, x2, y);
+            CGContextStrokePath(context);
+        } else if (baseStyle == DHTextLineStyleDouble) {
+            CGContextMoveToPoint(context, x1, y - lineWidth);
+            CGContextAddLineToPoint(context, x2, y - lineWidth);
+            CGContextStrokePath(context);
+            CGContextMoveToPoint(context, x1, y + lineWidth);
+            CGContextAddLineToPoint(context, x2, y + lineWidth);
+            CGContextStrokePath(context);
+        }
+    }CGContextRestoreGState(context);
+}
+
+- (void) getXHeight:(CGFloat *)xHeight
+  underlinePosition:(CGFloat *)underlinePosition
+      lineThickness:(CGFloat *)lineThickness
+            forRuns:(CFArrayRef)runs
+{
+    CGFloat maxXHeight = 0;
+    CGFloat maxUnderlinePos = 0;
+    CGFloat maxLineThickness = 0;
+    CFIndex runCount = CFArrayGetCount(runs);
+    for (CFIndex i = 0; i < runCount; i++) {
+        CTRunRef run = CFArrayGetValueAtIndex(runs, i);
+        CFDictionaryRef attributes = CTRunGetAttributes(run);
+        if (attributes) {
+            CTFontRef font = CFDictionaryGetValue(attributes, kCTFontAttributeName);
+            if (font) {
+                CGFloat xHeight = CTFontGetXHeight(font);
+                maxXHeight = MAX(maxXHeight, xHeight);
+                CGFloat underlinePos = CTFontGetUnderlinePosition(font);
+                maxUnderlinePos = MIN(maxUnderlinePos, underlinePos);
+                CGFloat lineThickness = CTFontGetUnderlineThickness(font);
+                maxLineThickness = MAX(maxLineThickness, lineThickness);
+            }
+        }
+    }
+    if (xHeight) *xHeight = maxXHeight;
+    if (underlinePosition) *underlinePosition = maxUnderlinePos;
+    if (lineThickness) *lineThickness = maxLineThickness;
 }
 @end

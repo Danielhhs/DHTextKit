@@ -19,4 +19,15 @@
 
 + (CTLineTruncationType) ctLineTruncationTypeFromDHTurncationType:(DHTextTruncationType)dhTruncationType;
 + (DHTextTruncationType) dhTruncationTypeFromCTLineTruncationType:(CTLineTruncationType)ctTruncationType;
+
++ (UIColor *) defaultColor;
+
++ (CGFloat) CGFloatPixelRound:(CGFloat)number;
++ (CGFloat) CGFloatPixelFloor:(CGFloat)number;
+
++ (CGFloat) screenScale;
++ (CGFloat) CGFloatToPixel:(CGFloat)number;
++ (CGFloat) CGFloatPixelHalf:(CGFloat)number;
+
++ (CGRect) mergeRect:(CGRect)rect1 withRect:(CGRect)rect2 isVertical:(BOOL) isVertical;
 @end
