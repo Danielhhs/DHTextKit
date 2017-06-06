@@ -230,7 +230,14 @@
     CFArrayRef runs = CTLineGetGlyphRuns(self.ctLine);
     CFIndex runCount = CFArrayGetCount(runs);
     CFRange lineRange = CTLineGetStringRange(self.ctLine);
+    BOOL needToSkipRun = NO;
+    NSInteger jumpRunIndex = 0;
     for (CFIndex runNo = 0; runNo < runCount; runNo++) {
+        if (needToSkipRun == YES) {
+            needToSkipRun = NO;
+            runNo = jumpRunIndex + 1;
+            if (runNo > runCount) break;
+        }
         CTRunRef run = CFArrayGetValueAtIndex(runs, runNo);
         CFIndex glyphCount = CTRunGetGlyphCount(run);
         if (glyphCount == 0) {
@@ -246,13 +253,25 @@
         if (textRange.location + textRange.length > lineRange.location + lineRange.length) continue;
         
         NSMutableArray *runRects = [NSMutableArray array];
-        CGPoint runPosition = CGPointZero;
-        CTRunGetPositions(run, CFRangeMake(0, 1), &runPosition);
-        CGFloat ascent, descent;
-        CGFloat width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, NULL);
-        runPosition.x += linePosX;
-        CGRect boundingRect = CGRectMake(runPosition.x, linePosY - descent, width, ascent + descent);
-        [runRects addObject:[NSValue valueWithCGRect:boundingRect]];
+        BOOL endFound = NO;
+        NSInteger endRunIndex = runNo;
+        for (CFIndex rr = runNo; rr < runCount; rr++) {
+            CTRunRef iRun = CFArrayGetValueAtIndex(runs, rr);
+            NSDictionary *attrs = (id)CTRunGetAttributes(iRun);
+            DHTextBorder *iBorder = attrs[attributeKey];
+            if (![border isEqual:iBorder]) {
+                endFound = YES;
+                break;
+            }
+            endRunIndex = rr;
+            CGPoint runPosition = CGPointZero;
+            CTRunGetPositions(iRun, CFRangeMake(0, 1), &runPosition);
+            CGFloat ascent, descent;
+            CGFloat width = CTRunGetTypographicBounds(iRun, CFRangeMake(0, 0), &ascent, &descent, NULL);
+            runPosition.x += linePosX;
+            CGRect boundingRect = CGRectMake(runPosition.x, linePosY - descent, width, ascent + descent);
+            [runRects addObject:[NSValue valueWithCGRect:boundingRect]];
+        }
         
         //Merge rects in the same line
         NSMutableArray *drawRects = [NSMutableArray array];
@@ -269,6 +288,8 @@
             [drawRects addObject:[NSValue valueWithCGRect:currentRect]];
         }
         [self drawBorder:border inRects:drawRects inContext:context size:size position:position];
+        needToSkipRun = YES;
+        jumpRunIndex = endRunIndex;
     }
     CGContextRestoreGState(context);
 }
