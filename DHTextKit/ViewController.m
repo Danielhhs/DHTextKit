@@ -58,6 +58,9 @@
     
     DHTextDecoration *underline = [DHTextDecoration decorationWithStyle:DHTextLineStyleSingle width:@(2) color:[UIColor blueColor]];
     [attrStr setTextUnderline:underline forRange:NSMakeRange(0, 3)];
+    
+    DHTextDecoration *strikeThrough = [DHTextDecoration decorationWithStyle:DHTextLineStyleSingle width:@(2) color:[UIColor grayColor]];
+    [attrStr setTextStrikeThrough:strikeThrough forRange:NSMakeRange(3, 3)];
     [attrStr setLineBreakMode:NSLineBreakByCharWrapping];
     label.attribtuedText = attrStr;
     label.textContainerInsets = UIEdgeInsetsMake(5, 10, 5, 5);

@@ -40,6 +40,7 @@
 @property (nonatomic) BOOL needToDrawText;
 @property (nonatomic) BOOL needToDrawBackgroundBorder;
 @property (nonatomic) BOOL needToDrawUnderline;
+@property (nonatomic) BOOL needToDrawStrikeThrough;
 @end
 
 @implementation DHTextLine
@@ -189,6 +190,9 @@
         if (attribtues[DHTextUnderlineAttributeName]) {
             self.needToDrawUnderline = YES;
         }
+        if (attribtues[DHTextStrikeThroughAttributeName]) {
+            self.needToDrawStrikeThrough = YES;
+        }
     }
 }
 
@@ -212,6 +216,7 @@
     [self drawTextInContext:context size:size position:position];
     [self drawInnerShadowInContext:context size:size position:position];
     [self drawAttachmentsInContext:context size:size position:position inView:view orLayer:layer];
+    [self drawDecorationInContext:context size:size position:position type:DHTextDecorationTypeStrikeThrough];
     
 }
 
@@ -648,7 +653,7 @@
         DHTextDecoration *underline = attributes[DHTextUnderlineAttributeName];
         DHTextDecoration *strikeThrough = attributes[DHTextStrikeThroughAttributeName];
         if (type == DHTextDecorationTypeUnderLine && underline == nil) continue;
-        if (type == DHTextDecorationTypeStrikeThrough && underline == nil) continue;
+        if (type == DHTextDecorationTypeStrikeThrough && strikeThrough == nil) continue;
         CFRange runRange = CTRunGetStringRange(run);
         if (runRange.location == kCFNotFound || runRange.length == 0) continue;
         if (runRange.location + runRange.length > self.range.location + self.range.length) continue;
@@ -656,42 +661,55 @@
         CGPoint underlineStart, strikeThroughStart;
         CGFloat length;
         underlineStart.y = size.height - self.position.y + underlinePosition;
-        strikeThroughStart.y = self.position.y + xHeight / 2;
+        strikeThroughStart.y = size.height - self.position.y + xHeight / 2;
         CGPoint runPosition = CGPointZero;
         CTRunGetPositions(run, CFRangeMake(0, 0), &runPosition);
         underlineStart.x = strikeThroughStart.x = runPosition.x + self.position.x;
         length = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), NULL, NULL, NULL);
         
         if (type == DHTextDecorationTypeUnderLine) {
-            CGColorRef color = underline.color.CGColor;
-            if (color == NULL) {
-                color = (__bridge CGColorRef)(attributes[(id)kCTForegroundColorAttributeName]);
-                color = [DHTextUtils defaultColor].CGColor;
-            }
-            CGFloat thickness = underline.width ? [underline.width doubleValue] : lineThickness;
-            DHTextShadow *shadow = underline.shadow;
-            while (shadow) {
-                if (!shadow.color) {
-                    shadow = shadow.subShadow;
-                    continue;
-                }
-                CGFloat offsetAlterX = size.width + 0xFFFF;
-                CGContextSaveGState(context); {
-                    CGSize offset = shadow.offset;
-                    offset.width -= offsetAlterX;
-                    CGContextSaveGState(context); {
-                        CGContextSetShadowWithColor(context, offset, shadow.radius, [shadow.color CGColor]);
-                        CGContextSetBlendMode(context, shadow.blendMode);
-                        CGContextTranslateCTM(context, offsetAlterX, 0);
-                        [self drawLineInContext:context length:length thickness:thickness lineStyle:underline.style start:underlineStart color:color];
-                    }CGContextRestoreGState(context);
-                } CGContextRestoreGState(context);
-                shadow = shadow.subShadow;
-            }
-            [self drawLineInContext:context length:length thickness:thickness lineStyle:underline.style start:underlineStart color:color];
+            [self drawDecoration:underline textAttributes:attributes containerSize:size lineThickness:lineThickness startPoint:underlineStart length:length inContext:context];
+        } else if (type == DHTextDecorationTypeStrikeThrough) {
+            [self drawDecoration:strikeThrough textAttributes:attributes containerSize:size lineThickness:lineThickness startPoint:strikeThroughStart length:length inContext:context];
         }
     }
     CGContextRestoreGState(context);
+}
+
+- (void) drawDecoration:(DHTextDecoration *)decoration
+         textAttributes:(NSDictionary *)attributes
+          containerSize:(CGSize)size
+          lineThickness:(CGFloat)lineThickness
+             startPoint:(CGPoint)startPoint
+                 length:(CGFloat)length
+              inContext:(CGContextRef)context
+{
+    CGColorRef color = decoration.color.CGColor;
+    if (color == NULL) {
+        color = (__bridge CGColorRef)(attributes[(id)kCTForegroundColorAttributeName]);
+        color = [DHTextUtils defaultColor].CGColor;
+    }
+    CGFloat thickness = decoration.width ? [decoration.width doubleValue] : lineThickness;
+    DHTextShadow *shadow = decoration.shadow;
+    while (shadow) {
+        if (!shadow.color) {
+            shadow = shadow.subShadow;
+            continue;
+        }
+        CGFloat offsetAlterX = size.width + 0xFFFF;
+        CGContextSaveGState(context); {
+            CGSize offset = shadow.offset;
+            offset.width -= offsetAlterX;
+            CGContextSaveGState(context); {
+                CGContextSetShadowWithColor(context, offset, shadow.radius, [shadow.color CGColor]);
+                CGContextSetBlendMode(context, shadow.blendMode);
+                CGContextTranslateCTM(context, offsetAlterX, 0);
+                [self drawLineInContext:context length:length thickness:thickness lineStyle:decoration.style start:startPoint color:color];
+            }CGContextRestoreGState(context);
+        } CGContextRestoreGState(context);
+        shadow = shadow.subShadow;
+    }
+    [self drawLineInContext:context length:length thickness:thickness lineStyle:decoration.style start:startPoint color:color];
 }
 
 - (void) drawLineInContext:(CGContextRef) context

@@ -326,4 +326,14 @@
     [self setAttribute:DHTextUnderlineAttributeName value:underline range:range];
 }
 
+- (void) setTextStrikeThrough:(DHTextDecoration *)strikeThrough
+{
+    [self setTextStrikeThrough:strikeThrough forRange:NSMakeRange(0, [self length])];
+}
+
+- (void) setTextStrikeThrough:(DHTextDecoration *)strikeThrough forRange:(NSRange)range
+{
+    [self setAttribute:DHTextStrikeThroughAttributeName value:strikeThrough range:range];
+}
+
 @end

@@ -57,6 +57,7 @@
 - (void) setTextAttachment:(nullable DHTextAttachment *)textAttachment;
 - (void) setBackgroundBorder:(nullable DHTextBorder *)border;
 - (void) setTextUnderline:(nullable DHTextDecoration *)underline;
+- (void) setTextStrikeThrough:(nullable DHTextDecoration *)strikeThrough;
 
 - (void) setFont:(nullable UIFont *)font forRange:(NSRange)range;
 - (void) setKern:(nullable NSNumber *)kern forRange:(NSRange)range;
@@ -76,6 +77,7 @@
 - (void) setTextAttachment:(nullable DHTextAttachment *)textAttachment forRange:(NSRange)range;
 - (void) setBackgroundBorder:(nullable DHTextBorder *)border forRange:(NSRange)range;
 - (void) setTextUnderline:(nullable DHTextDecoration *)underline forRange:(NSRange)range;
+- (void) setTextStrikeThrough:(nullable DHTextDecoration *)strikeThrough forRange:(NSRange)range;
 
 
 @end
