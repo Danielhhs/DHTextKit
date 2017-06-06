@@ -22,7 +22,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     DHLabel *label = [[DHLabel alloc] initWithFrame:CGRectMake(100, 100, 200, 100)];
-    label.maximumNumberOfRows = 1;
+    label.maximumNumberOfRows = 2;
     label.truncationType = DHTextTruncationTypeEnd;
     label.truncationToken = [[NSAttributedString alloc] initWithString:@"YES"];
 //    label.lineBreakMode = NSLineBreakByCharWrapping;

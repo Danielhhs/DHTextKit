@@ -208,7 +208,7 @@
 {
     [self drawBorderInContext:context size:size position:position type:DHTextBorderTypeBackground];
     [self drawShadowInContext:context size:size position:position];
-//    [self drawDecorationInContext:context size:size position:position type:DHTextDecorationTypeUnderLine];
+    [self drawDecorationInContext:context size:size position:position type:DHTextDecorationTypeUnderLine];
     [self drawTextInContext:context size:size position:position];
     [self drawInnerShadowInContext:context size:size position:position];
     [self drawAttachmentsInContext:context size:size position:position inView:view orLayer:layer];
@@ -236,7 +236,7 @@
         if (needToSkipRun == YES) {
             needToSkipRun = NO;
             runNo = jumpRunIndex + 1;
-            if (runNo > runCount) break;
+            if (runNo >= runCount) break;
         }
         CTRunRef run = CFArrayGetValueAtIndex(runs, runNo);
         CFIndex glyphCount = CTRunGetGlyphCount(run);
@@ -655,7 +655,7 @@
         
         CGPoint underlineStart, strikeThroughStart;
         CGFloat length;
-        underlineStart.y = self.position.y + underlinePosition;
+        underlineStart.y = size.height - self.position.y + underlinePosition;
         strikeThroughStart.y = self.position.y + xHeight / 2;
         CGPoint runPosition = CGPointZero;
         CTRunGetPositions(run, CFRangeMake(0, 0), &runPosition);
