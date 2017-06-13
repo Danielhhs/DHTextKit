@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 #import "DHTextAttribute.h"
 
-@interface DHTextContainer : NSObject
+@interface DHTextContainer : NSObject<NSCopying>
 
 + (nullable DHTextContainer *) containerWithSize:(CGSize)size;
 
@@ -24,6 +24,7 @@
 @property (nonatomic, strong, nullable) UIBezierPath *path;
 @property (nonatomic) DHTextTruncationType truncationType;
 @property (nonatomic) NSInteger maximumNumberOfRows;
+@property (nonatomic) CGFloat pathLineWidth;
 @property (nonatomic, strong, nullable) NSAttributedString *truncationToken;    //Truncation place holder, if nil, use "..."
 
 @end

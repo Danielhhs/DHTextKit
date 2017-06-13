@@ -16,6 +16,21 @@ static dispatch_queue_t queues[MAX_QUEUE_COUNT];
 
 @implementation DHAsyncDisplayLayer
 
+- (void) setFrame:(CGRect)frame
+{
+    [super setFrame:frame];
+}
+
+- (void) setPosition:(CGPoint)position
+{
+    [super setPosition:position];
+}
+
+- (void) setBounds:(CGRect)bounds
+{
+    [super setBounds:bounds];
+}
+
 + (id) defaultValueForKey:(NSString *)key
 {
     if ([key isEqualToString:@"displayAsynchronously"]) {

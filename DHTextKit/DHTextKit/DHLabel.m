@@ -11,6 +11,7 @@
 #import "DHTextLayout.h"
 #import "DHAsyncDisplayLayer.h"
 #import "NSAttributedString+DHText.h"
+#import "DHTextRange.h"
 
 static const CGFloat kMaxLabelHeight = 1000000;
 
@@ -132,10 +133,31 @@ static const CGFloat kMaxLabelHeight = 1000000;
     [self.layer setNeedsDisplay];
 }
 
-- (void) sizeToFit
+- (CGSize) sizeThatFits:(CGSize)size
 {
-    [self _updateLayoutIfNeeds];
-    self.bounds = self.layout.textBoundingRect;
+    if (size.height <= 0) size.height = DHTextContainerMaxSize.height;
+    if (self.bounds.size.width == size.width) {
+        [self _updateLayoutIfNeeds];
+        DHTextLayout *layout = self.layout;
+        BOOL contains = NO;
+        if (layout.container.maximumNumberOfRows == 0) {
+            if (layout.truncatedLine == nil) {
+                contains = YES;
+            }
+        } else {
+            if (layout.rowCount <= layout.container.maximumNumberOfRows) {
+                contains = YES;
+            }
+        }
+        if (contains) {
+            return layout.textBoundingSize;
+        }
+    }
+    size.width = DHTextContainerMaxSize.width;
+    DHTextContainer *container = [self.layout.container copy];
+    container.size = size;
+    DHTextLayout *layout = [DHTextLayout layoutWithContainer:container text:self.attribtuedText];
+    return layout.textBoundingSize;
 }
 
 + (CGRect) textBoundingRectForAttributedString:(NSAttributedString *)attributedString
@@ -209,6 +231,32 @@ static const CGFloat kMaxLabelHeight = 1000000;
             }
         }
     }
+    if (!_state.swallowTouch) {
+        [super touchesMoved:touches withEvent:event];
+    }
+}
+
+- (void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+//    UITouch *touch = [touches anyObject];
+//    CGPoint point = [touch locationInView:self];
+    
+    if (_state.trackingTouch) {
+        [self _endLongpressTimer];
+        if (!_state.touchMoved && _tapAction) {
+            NSRange range = NSMakeRange(NSNotFound, 0);
+            CGRect rect = CGRectNull;
+            CGPoint point = [self _convertPointToLayout:_touchBeginPoint];
+            DHTextRange *textRange = [self.layout textRangeAtPoint:point];
+            CGRect textRect = [self.layout rectForRange:textRange];
+            textRect = [self _convertRectFromLayout:textRect];
+            if (textRange) {
+                range = [textRange nsRange];
+                rect = textRect;
+            }
+            _tapAction(self, self.attribtuedText, range, rect);
+        }
+    }
 }
 
 - (void) _startLongPressTimer
@@ -219,5 +267,42 @@ static const CGFloat kMaxLabelHeight = 1000000;
 - (void) _endLongpressTimer
 {
     
+}
+
+#pragma mark - Private Helpers
+- (CGPoint) _convertPointToLayout:(CGPoint)point
+{
+    CGSize boundingSize = self.layout.textBoundingRect.size;
+    if (_textVerticalAlignment == DHTextVerticalAlignmentCenter) {
+        point.y -= (self.bounds.size.height - boundingSize.height) * 0.5;
+    } else if (_textVerticalAlignment == DHTextVerticalAlignmentBottom) {
+        point.y -= (self.bounds.size.height - boundingSize.height);
+    }
+    return point;
+}
+
+- (CGPoint) _convertPointFromLayout:(CGPoint) point
+{
+    CGSize boundingSize = self.layout.textBoundingRect.size;
+    if (boundingSize.height < self.bounds.size.height) {
+        if (_textVerticalAlignment == DHTextVerticalAlignmentCenter) {
+            point.y += (self.bounds.size.height - boundingSize.height) * 0.5;
+        } else if (_textVerticalAlignment == DHTextVerticalAlignmentBottom) {
+            point.y += (self.bounds.size.height - boundingSize.height);
+        }
+    }
+    return point;
+}
+
+- (CGRect) _convertRectFromLayout:(CGRect)rect
+{
+    rect.origin = [self _convertPointFromLayout:rect.origin];
+    return rect;
+}
+
+- (CGRect) _convertRectToLayout:(CGRect)rect
+{
+    rect.origin = [self _convertPointToLayout:rect.origin];
+    return rect;
 }
 @end

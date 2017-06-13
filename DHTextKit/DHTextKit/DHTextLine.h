@@ -10,6 +10,7 @@
 #import <CoreText/CoreText.h>
 #import <UIKit/UIKit.h>
 #import "DHTextAttachment.h"
+#import "DHTextRange.h"
 @interface DHTextLine : NSObject
 
 + (DHTextLine *) lineWithCTLine:(CTLineRef)ctLine
@@ -45,4 +46,7 @@
 @property (nonatomic, strong, readonly) NSArray <DHTextAttachment *> *attachments;
 @property (nonatomic, strong, readonly) NSArray <NSValue *> *attachmentRanges;  //NSValue wrapping NSRange
 @property (nonatomic, strong, readonly) NSArray <NSValue *> *attachmentRects;   //NSValue wrapping CGRect
+
+#pragma mark - Get Info
+- (CTRunRef) runAtPosition:(DHTextPosition *)position;
 @end

@@ -785,4 +785,61 @@
     if (underlinePosition) *underlinePosition = maxUnderlinePos;
     if (lineThickness) *lineThickness = maxLineThickness;
 }
+
+#pragma mark - Get Info
+- (CTRunRef) runAtPosition:(DHTextPosition *)position
+{
+    if (!position) return NULL;
+    CFArrayRef runs = CTLineGetGlyphRuns(self.ctLine);
+    CFIndex runCount = CFArrayGetCount(runs);
+    for (CFIndex i = 0; i < runCount; i++) {
+        CTRunRef run = CFArrayGetValueAtIndex(runs, i);
+        CFRange range = CTRunGetStringRange(run);
+        if (position.affinity == DHTextAffinityBackward) {
+            if (range.location < position.offset && position.offset <= range.location + range.length) {
+                return run;
+            }
+        } else {
+            if (range.location <= position.offset && position.offset < range.location + range.length) {
+                return run;
+            }
+        }
+    }
+    return NULL;
+}
+
+- (CGSize) size
+{
+    return _bounds.size;
+}
+
+- (CGFloat) width
+{
+    return CGRectGetWidth(_bounds);
+}
+
+- (CGFloat) height
+{
+    return CGRectGetHeight(_bounds);
+}
+
+- (CGFloat) top
+{
+    return CGRectGetMinY(_bounds);
+}
+
+- (CGFloat) bottom
+{
+    return CGRectGetMaxY(_bounds);
+}
+
+- (CGFloat) left
+{
+    return CGRectGetMinX(_bounds);
+}
+
+- (CGFloat) right
+{
+    return CGRectGetMaxX(_bounds);
+}
 @end

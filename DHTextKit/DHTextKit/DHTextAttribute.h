@@ -70,3 +70,12 @@ UIKIT_EXTERN NSString *_Nonnull const DHTextAttachmentToken; ///U+FFFC, used for
 UIKIT_EXTERN NSString *_Nonnull const DHTextTruncationToken; ///U+2026, used for text truncation  "…"
 
 @end
+
+@interface DHTextBinding : NSObject<NSCopying, NSCoding>
+
++ (nullable DHTextBinding *) bindingWithDeleteConfirm:(BOOL)deleteConfirm;
+
+@property (nonatomic)BOOL deleteConfirm;
+
+@end
+

@@ -30,6 +30,10 @@
 @property (nonatomic) CGFloat lineSpacing;
 @property (nonatomic) CGFloat paragraphSpacing;
 
+//Alignment
+@property (nonatomic) NSTextAlignment textAlignment;
+@property (nonatomic) DHTextVerticalAlignment textVerticalAlignment;
+
 @property (nonatomic, strong) DHTextAction tapAction;
 @property (nonatomic, strong) DHTextAction longPressAction;
 

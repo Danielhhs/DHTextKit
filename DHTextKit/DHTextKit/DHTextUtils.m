@@ -110,4 +110,45 @@
     }
 }
 
++ (BOOL) isLineBreakString:(NSString *)str
+{
+    if (str.length > 2 || str.length == 0) return NO;
+    if (str.length == 1) {
+        unichar c = [str characterAtIndex:0];
+        return [DHTextUtils isLineBreakChar:c];
+    } else {
+        return ([str characterAtIndex:0] == '\r') && ([str characterAtIndex:1] == '\n');
+    }
+}
+
++ (BOOL) isLineBreakChar:(unichar)c {
+    switch (c) {
+        case 0x000D:
+        case 0x2028:
+        case 0x000A:
+        case 0x2029:
+            return YES;
+        default:
+            return NO;
+    }
+}
+
++ (NSInteger) lineBreakTailLength:(NSString *)str
+{
+    if ([str length] >= 2) {
+        unichar c2 = [str characterAtIndex:[str length] - 1];
+        if ([DHTextUtils isLineBreakChar:c2]) {
+            unichar c1 = [str characterAtIndex:[str length] - 2];
+            if (c1 == '\r' && c2 == '\n') return 2;
+            else return 1;
+        } else {
+            return 0;
+        }
+    } else if ([str length] == 1) {
+        return [DHTextUtils isLineBreakChar:[str characterAtIndex:0]] ? 1 : 0;
+    } else {
+        return 0;
+    }
+}
+
 @end

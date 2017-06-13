@@ -12,6 +12,7 @@
 #import "DHTextShadow.h"
 #import "DHTextBorder.h"
 #import "DHTextDecoration.h"
+#import "DHTextAttribute.h"
 
 @interface ViewController ()
 
@@ -21,7 +22,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    DHLabel *label = [[DHLabel alloc] initWithFrame:CGRectMake(100, 100, 200, 100)];
+    DHLabel *label = [[DHLabel alloc] initWithFrame:CGRectMake(100, 100, 200, 300)];
     label.maximumNumberOfRows = 2;
     label.truncationType = DHTextTruncationTypeEnd;
     label.truncationToken = [[NSAttributedString alloc] initWithString:@"YES"];
@@ -65,6 +66,15 @@
     label.attribtuedText = attrStr;
     label.textContainerInsets = UIEdgeInsetsMake(5, 10, 5, 5);
     [label sizeToFit];
+    
+    DHTextAction tapAction = ^( UIView * _Nonnull  containerView, NSAttributedString * _Nonnull text, NSRange range, CGRect rect) {
+        NSLog(@"text = %@", text);
+        NSLog(@"range = (%lu, %lu)", range.location, range.length);
+        NSLog(@"rect = %@", NSStringFromCGRect(rect));
+    };
+    label.tapAction = tapAction;
+    
+    label.backgroundColor = [UIColor yellowColor];
     [self.view addSubview:label];
     // Do any additional setup after loading the view, typically from a nib.
 }

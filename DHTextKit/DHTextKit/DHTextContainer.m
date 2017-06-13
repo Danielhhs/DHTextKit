@@ -33,4 +33,20 @@
     return container;
 }
 
+- (void) setSize:(CGSize)size
+{
+    _size = size;
+}
+
+- (id) copyWithZone:(NSZone *)zone
+{
+    DHTextContainer *container = [DHTextContainer new];
+    container.size = self.size;
+    container.insets = self.insets;
+    container.path = self.path;
+    container.truncationType = self.truncationType;
+    container.maximumNumberOfRows = self.maximumNumberOfRows;
+    container.truncationToken = [self.truncationToken copyWithZone:zone];
+    return container;
+}
 @end
