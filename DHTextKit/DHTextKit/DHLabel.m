@@ -12,6 +12,7 @@
 #import "DHAsyncDisplayLayer.h"
 #import "NSAttributedString+DHText.h"
 #import "DHTextRange.h"
+#import "DHTextHighlight.h"
 
 static const CGFloat kMaxLabelHeight = 1000000;
 
@@ -29,9 +30,20 @@ static const CGFloat kMaxLabelHeight = 1000000;
         
         unsigned int contentsNeedFade : 1;
     } _state;
+    
+    
+    DHTextLayout *_innerLayout;
+    DHTextHighlight *_highlight;
+    DHTextLayout *_highlightLayout;
+    
+    DHTextLayout *_shrinkInnerLayout;
+    DHTextLayout *_shrinkHighlightLayout;
 }
-@property (nonatomic, strong) DHTextLayout *layout;
 @property (nonatomic, strong) DHTextContainer *textContainer;
+@property (nonatomic) NSRange highlightRange;
+
+@property (nonatomic, strong) NSTimer *longPressTimer;
+
 @property (nonatomic) BOOL needsToUpdateLayout;
 @property (nonatomic) CGPoint touchBeginPoint;
 @end
@@ -65,6 +77,7 @@ static const CGFloat kMaxLabelHeight = 1000000;
     self.shadowColor = [UIColor blackColor];
     self.textColor = [UIColor blackColor];
     self.shadowOffset = 5;
+    self.fadeOnHighlight = YES;
 }
 
 + (Class) layerClass
@@ -121,8 +134,8 @@ static const CGFloat kMaxLabelHeight = 1000000;
         self.textContainer.truncationType = self.truncationType;
         self.textContainer.truncationToken = self.truncationToken;
         self.textContainer.insets = self.textContainerInsets;
-        self.layout = [DHTextLayout layoutWithContainer:self.textContainer
-                                                   text:[self _attributedStringToDraw]];
+        _innerLayout = [DHTextLayout layoutWithContainer:self.textContainer
+                                                    text:[self _attributedStringToDraw]];
         [self setNeedsDisplay];
     }
 }
@@ -138,7 +151,7 @@ static const CGFloat kMaxLabelHeight = 1000000;
     if (size.height <= 0) size.height = DHTextContainerMaxSize.height;
     if (self.bounds.size.width == size.width) {
         [self _updateLayoutIfNeeds];
-        DHTextLayout *layout = self.layout;
+        DHTextLayout *layout = self.innerLayout;
         BOOL contains = NO;
         if (layout.container.maximumNumberOfRows == 0) {
             if (layout.truncatedLine == nil) {
@@ -154,7 +167,7 @@ static const CGFloat kMaxLabelHeight = 1000000;
         }
     }
     size.width = DHTextContainerMaxSize.width;
-    DHTextContainer *container = [self.layout.container copy];
+    DHTextContainer *container = [self.innerLayout.container copy];
     container.size = size;
     DHTextLayout *layout = [DHTextLayout layoutWithContainer:container text:self.attribtuedText];
     return layout.textBoundingSize;
@@ -177,14 +190,20 @@ static const CGFloat kMaxLabelHeight = 1000000;
 #pragma mark - DHAsyncDisplayLayerDelegate
 - (DHAsyncDisplayTask *) asyncDisplayTask
 {
+    BOOL contentNeedsFade = _state.contentsNeedFade;
+    NSAttributedString *text = self.attribtuedText;
+    DHTextContainer *container = [self.innerLayout container];
+    DHTextVerticalAlignment verticalAlignment = _textVerticalAlignment;
     DHAsyncDisplayTask *task = [[DHAsyncDisplayTask alloc] init];
+    __block DHTextLayout *layout = (_state.showingHighlight && _highlightLayout) ? _highlightLayout : self.innerLayout;
+    
     task.willDisplay = ^(CALayer *layer) {
         
     };
     
     task.display = ^(CGContextRef context, CGSize size) {
         [self _updateLayoutIfNeeds];
-        [self.layout drawInContext:context size:size point:CGPointZero view:self layer:self.layer cancel:nil];
+        [layout drawInContext:context size:size point:CGPointZero view:self layer:self.layer cancel:nil];
     };
     
     task.didDisplay = nil;
@@ -197,12 +216,20 @@ static const CGFloat kMaxLabelHeight = 1000000;
     [self _updateLayoutIfNeeds];
     UITouch *touch = [touches anyObject];
     CGPoint point = [touch locationInView:self];
-    if (_tapAction || _longPressAction) {
+    
+    _highlight = [self _getHighlightAtPoint:point range:&_highlightRange];
+    _highlightLayout = nil;
+    _shrinkHighlightLayout = nil;
+    _state.hasTapAction = (_tapAction != nil);
+    _state.hasLongPressAction = (_longPressAction != nil);
+    
+    if (_highlight || _tapAction || _longPressAction) {
         _touchBeginPoint = point;
         _state.trackingTouch = YES;
         _state.swallowTouch = YES;
         _state.touchMoved = NO;
         [self _startLongPressTimer];
+        if (_highlight) [self _showHighlightAnimated:NO];
     } else {
         _state.trackingTouch = NO;
         _state.swallowTouch = NO;
@@ -230,6 +257,14 @@ static const CGFloat kMaxLabelHeight = 1000000;
                 [self _endLongpressTimer];
             }
         }
+        if (_state.touchMoved && _highlight) {
+            DHTextHighlight *highlight = [self _getHighlightAtPoint:point range:NULL];
+            if (highlight == _highlight) {
+                [self _showHighlightAnimated:_fadeOnHighlight];
+            } else {
+                [self _hideHightlightAnimated:_fadeOnHighlight];
+            }
+        }
     }
     if (!_state.swallowTouch) {
         [super touchesMoved:touches withEvent:event];
@@ -238,8 +273,8 @@ static const CGFloat kMaxLabelHeight = 1000000;
 
 - (void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
-//    UITouch *touch = [touches anyObject];
-//    CGPoint point = [touch locationInView:self];
+    UITouch *touch = [touches anyObject];
+    CGPoint point = [touch locationInView:self];
     
     if (_state.trackingTouch) {
         [self _endLongpressTimer];
@@ -247,8 +282,8 @@ static const CGFloat kMaxLabelHeight = 1000000;
             NSRange range = NSMakeRange(NSNotFound, 0);
             CGRect rect = CGRectNull;
             CGPoint point = [self _convertPointToLayout:_touchBeginPoint];
-            DHTextRange *textRange = [self.layout textRangeAtPoint:point];
-            CGRect textRect = [self.layout rectForRange:textRange];
+            DHTextRange *textRange = [self.innerLayout textRangeAtPoint:point];
+            CGRect textRect = [self.innerLayout rectForRange:textRange];
             textRect = [self _convertRectFromLayout:textRect];
             if (textRange) {
                 range = [textRange nsRange];
@@ -256,23 +291,166 @@ static const CGFloat kMaxLabelHeight = 1000000;
             }
             _tapAction(self, self.attribtuedText, range, rect);
         }
+        if (_highlight) {
+            if (!_state.touchMoved || [self _getHighlightAtPoint:point range:NULL]) {
+                DHTextAction tapAction = _highlight.tapAction ? _highlight.tapAction : _highlightTapAction;
+                if (tapAction) {
+                    DHTextPosition *start = [DHTextPosition positionWithOffset:_highlightRange.location];
+                    DHTextPosition *end = [DHTextPosition positionWithOffset:_highlightRange.location + _highlightRange.length affinity:DHTextAffinityBackward];
+                    DHTextRange *range = [DHTextRange rangeWithStart:start end:end];
+                    CGRect rect = [self.innerLayout rectForRange:range];
+                    rect = [self _convertRectFromLayout:rect];
+                    tapAction(self, _attribtuedText, _highlightRange, rect);
+                }
+            }
+            [self _removeHighlightAnimated:_fadeOnHighlight];
+        }
     }
+}
+
+- (void) touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    [self _endTouch];
+    if (!_state.swallowTouch) [super touchesCancelled:touches withEvent:event];
 }
 
 - (void) _startLongPressTimer
 {
-    
+    [_longPressTimer invalidate];
+    _longPressTimer = [NSTimer timerWithTimeInterval:kLongPressMinimumDuration target:self selector:@selector(_trackDidLongPress) userInfo:nil repeats:NO];
+    [[NSRunLoop currentRunLoop] addTimer:_longPressTimer forMode:NSRunLoopCommonModes];
 }
 
 - (void) _endLongpressTimer
 {
-    
+    [_longPressTimer invalidate];
+    _longPressTimer = nil;
+}
+
+- (void) _trackDidLongPress
+{
+    [self _endLongpressTimer];
+    if (_state.hasLongPressAction && _longPressAction) {
+        NSRange range = NSMakeRange(NSNotFound, 0);
+        CGRect rect = CGRectNull;
+        CGPoint point = [self _convertPointToLayout:_touchBeginPoint];
+        DHTextRange *textRange = [self.innerLayout textRangeAtPoint:point];
+        CGRect textRect = [self.innerLayout rectForRange:textRange];
+        textRect = [self _convertRectFromLayout:textRect];
+        if (textRange) {
+            range = textRange.nsRange;
+            rect = textRect;
+        }
+        _longPressAction(self, self.attribtuedText, range, rect);
+    }
+    if (_highlight) {
+        DHTextAction longPressAction = _highlight.longPressAction ? _highlight.longPressAction : _highlightLongPressAction;
+        if (longPressAction) {
+            DHTextPosition *start = [DHTextPosition positionWithOffset:_highlightRange.location];
+            DHTextPosition *end = [DHTextPosition positionWithOffset:_highlightRange.location + _highlightRange.length affinity:DHTextAffinityBackward];
+            DHTextRange *range = [DHTextRange rangeWithStart:start end:end];
+            CGRect rect = [self.innerLayout rectForRange:range];
+            rect = [self _convertRectFromLayout:rect];
+            longPressAction(self, self.attribtuedText, _highlightRange,  rect);
+            [self _removeHighlightAnimated:YES];
+            _state.trackingTouch = NO;
+        }
+    }
+}
+
+#pragma mark - Highlights
+- (DHTextHighlight *) _getHighlightAtPoint:(CGPoint)point range:(NSRangePointer)range
+{
+    if (!self.innerLayout.containsHighlight) return nil;
+    point = [self _convertPointToLayout:point];
+    DHTextRange *textRange = [self.innerLayout textRangeAtPoint:point];
+    NSLog(@"==============Range = (%lu, %lu)", textRange.nsRange.location, textRange.nsRange.location + textRange.nsRange.length);
+    if (!textRange) return nil;
+    NSUInteger startIndex = textRange.start.offset;
+    if (startIndex == [self.attribtuedText length]) {
+        if (startIndex > 0) {
+            startIndex--;
+        }
+    }
+    NSRange highlightRange = NSMakeRange(0, 0);
+    DHTextHighlight *highlight = [self.attribtuedText attribute:DHTextHighlightAttributeName atIndex:startIndex longestEffectiveRange:&highlightRange inRange:NSMakeRange(0, [self.attribtuedText length])];
+    if (!highlight) return nil;
+    if (range) *range = highlightRange;
+    return highlight;
+}
+
+- (void) _showHighlightAnimated:(BOOL) animated
+{
+    if (!_highlight) return ;
+    if (!_highlightLayout) {
+        NSMutableAttributedString *hiText = [self.attribtuedText mutableCopy];
+        NSDictionary *newAttributes = _highlight.attributes;
+        [newAttributes enumerateKeysAndObjectsUsingBlock:^(NSString *  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+            [hiText setAttribute:key value:obj range:_highlightRange];
+        }];
+        _highlightLayout = [DHTextLayout layoutWithContainer:_innerLayout.container text:hiText];
+        _shrinkHighlightLayout = [DHLabel _shrinkLayoutWithLayout:_highlightLayout];
+        if (!_highlightLayout) _highlight = nil;
+    }
+    if (_highlightLayout && !_state.showingHighlight) {
+        _state.showingHighlight = YES;
+        _state.contentsNeedFade = animated;
+        [self _setLayoutNeedsRedraw];
+    }
+}
+
+- (void) _hideHightlightAnimated:(BOOL) animated
+{
+    if (_state.showingHighlight) {
+        _state.showingHighlight = NO;
+        _state.contentsNeedFade = animated;
+        [self _setLayoutNeedsRedraw];
+    }
+}
+
+- (void) _removeHighlightAnimated:(BOOL)animate
+{
+    [self _hideHightlightAnimated:animate];
+    _highlight = nil;
+    _highlightLayout = nil;
+    _shrinkHighlightLayout = nil;
+}
+
+- (void) _endTouch
+{
+    [self _endLongpressTimer];
+    [self _removeHighlightAnimated:YES];
+    _state.trackingTouch = NO;
+}
+
+#pragma mark - Layouts
+- (DHTextLayout *) innerLayout
+{
+    return _shrinkInnerLayout ? _shrinkInnerLayout : _innerLayout;
+}
+
+- (DHTextLayout *) highlightLayout
+{
+    return _shrinkHighlightLayout ? _shrinkHighlightLayout : _highlightLayout;
+}
+
++ (DHTextLayout *) _shrinkLayoutWithLayout:(DHTextLayout *) layout
+{
+    if ([layout.text length] && [layout.lines count] == 0) {
+        DHTextContainer *container = [layout.container copy];
+        container.maximumNumberOfRows = 1;
+        CGSize containerSize = container.size;
+        containerSize.width = DHTextContainerMaxSize.width;
+        container.size = containerSize;
+        return [DHTextLayout layoutWithContainer:container text:layout.text];
+    }
+    return nil;
 }
 
 #pragma mark - Private Helpers
 - (CGPoint) _convertPointToLayout:(CGPoint)point
 {
-    CGSize boundingSize = self.layout.textBoundingRect.size;
+    CGSize boundingSize = self.innerLayout.textBoundingRect.size;
     if (_textVerticalAlignment == DHTextVerticalAlignmentCenter) {
         point.y -= (self.bounds.size.height - boundingSize.height) * 0.5;
     } else if (_textVerticalAlignment == DHTextVerticalAlignmentBottom) {
@@ -283,7 +461,7 @@ static const CGFloat kMaxLabelHeight = 1000000;
 
 - (CGPoint) _convertPointFromLayout:(CGPoint) point
 {
-    CGSize boundingSize = self.layout.textBoundingRect.size;
+    CGSize boundingSize = self.innerLayout.textBoundingRect.size;
     if (boundingSize.height < self.bounds.size.height) {
         if (_textVerticalAlignment == DHTextVerticalAlignmentCenter) {
             point.y += (self.bounds.size.height - boundingSize.height) * 0.5;
@@ -305,4 +483,10 @@ static const CGFloat kMaxLabelHeight = 1000000;
     rect.origin = [self _convertPointToLayout:rect.origin];
     return rect;
 }
+
+- (void) _setLayoutNeedsRedraw
+{
+    [self.layer setNeedsDisplay];
+}
+
 @end

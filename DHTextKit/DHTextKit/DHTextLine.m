@@ -41,6 +41,7 @@
 @property (nonatomic) BOOL needToDrawBackgroundBorder;
 @property (nonatomic) BOOL needToDrawUnderline;
 @property (nonatomic) BOOL needToDrawStrikeThrough;
+@property (nonatomic) BOOL containsHighlight;
 @end
 
 @implementation DHTextLine
@@ -192,6 +193,9 @@
         }
         if (attribtues[DHTextStrikeThroughAttributeName]) {
             self.needToDrawStrikeThrough = YES;
+        }
+        if (attribtues[DHTextHighlightAttributeName]) {
+            self.containsHighlight = YES;
         }
     }
 }

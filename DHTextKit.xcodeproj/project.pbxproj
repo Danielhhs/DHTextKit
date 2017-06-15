@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		540E74931EEFE20F00FDE621 /* DHTextHighlight.m in Sources */ = {isa = PBXBuildFile; fileRef = 540E74921EEFE20F00FDE621 /* DHTextHighlight.m */; };
 		5412F3D21ED2E9B100739A5C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5412F3D11ED2E9B100739A5C /* main.m */; };
 		5412F3D51ED2E9B100739A5C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5412F3D41ED2E9B100739A5C /* AppDelegate.m */; };
 		5412F3D81ED2E9B100739A5C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5412F3D71ED2E9B100739A5C /* ViewController.m */; };
@@ -51,6 +52,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		540E74911EEFE20F00FDE621 /* DHTextHighlight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DHTextHighlight.h; sourceTree = "<group>"; };
+		540E74921EEFE20F00FDE621 /* DHTextHighlight.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DHTextHighlight.m; sourceTree = "<group>"; };
 		5412F3CD1ED2E9B100739A5C /* DHTextKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DHTextKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5412F3D11ED2E9B100739A5C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5412F3D31ED2E9B100739A5C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -222,6 +225,8 @@
 				54A562E11EDEC75F00AE44D4 /* DHTextBorder.m */,
 				54A562E31EE4FA9000AE44D4 /* DHTextDecoration.h */,
 				54A562E41EE4FA9000AE44D4 /* DHTextDecoration.m */,
+				540E74911EEFE20F00FDE621 /* DHTextHighlight.h */,
+				540E74921EEFE20F00FDE621 /* DHTextHighlight.m */,
 			);
 			path = DHTextKit;
 			sourceTree = "<group>";
@@ -376,6 +381,7 @@
 				54B1ECDF1EE8EEFC00366EBD /* DHTextRange.m in Sources */,
 				54CE9E881ED6B8C300F905D6 /* DHTextRunDelegate.m in Sources */,
 				5472D5BA1ED578D60094ED87 /* DHTextLine.m in Sources */,
+				540E74931EEFE20F00FDE621 /* DHTextHighlight.m in Sources */,
 				5412F3D81ED2E9B100739A5C /* ViewController.m in Sources */,
 				5412F3D51ED2E9B100739A5C /* AppDelegate.m in Sources */,
 				5412F3D21ED2E9B100739A5C /* main.m in Sources */,

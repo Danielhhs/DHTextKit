@@ -29,6 +29,11 @@ typedef struct {
 @property (nonatomic, readwrite) NSRange visibleRange;
 @property (nonatomic, readwrite) CGSize textBoundingSize;
 @property (nonatomic, readwrite) NSUInteger rowCount;
+@property (nonatomic, readwrite) BOOL containsHighlight;
+
+@property (nonatomic, assign) NSUInteger *lineRowsIndex;
+@property (nonatomic, assign) DHRowEdge *lineRowsEdge;  //Top left origins for each row;
+@property (nonatomic) BOOL rowMightSeperate;
 @end
 
 @implementation DHTextLayout
@@ -83,7 +88,7 @@ typedef struct {
     [self truncateWithCTLines:ctLines lines:lines path:path];
     
     self.lines = lines;
-    self.rowCount = [lines count];
+    [self updateRowsGeometry];
     [self updateBounds];
     [self updateTextBoundingSize];
 }
@@ -95,6 +100,11 @@ typedef struct {
     NSMutableArray *lines = [NSMutableArray array];
     CGPoint *lineOrigins = malloc(sizeof(CGPoint) * numberOfLines);
     CTFrameGetLineOrigins(self.frame, CFRangeMake(0, numberOfLines), lineOrigins);
+    NSUInteger rowIndex = -1;
+    NSUInteger rowCount = 0;
+    CGRect lastRect = CGRectMake(0, -FLT_MAX, 0, 0);
+    CGPoint lastPosition = CGPointMake(0, -FLT_MAX);
+    NSUInteger lineCurrentIndex = 0;
     for (NSUInteger lineNo = 0; lineNo < numberOfLines; lineNo++) {
         CTLineRef ctLine = CFArrayGetValueAtIndex(ctLines, lineNo);
         CGPoint lineOrigin = lineOrigins[lineNo];
@@ -104,11 +114,32 @@ typedef struct {
         position.x = pathBox.origin.x + lineOrigin.x;
         position.y = pathBox.origin.y + pathBox.size.height - lineOrigin.y;
         DHTextLine *line = [DHTextLine lineWithCTLine:ctLine position:position];
-        line.row = lineNo;
-        line.index = lineNo;
+        
+        CGRect rect = line.bounds;
+        BOOL newRow = YES;
+        //Determine whether the line is in a new row;
+        //If there's a exclusion path, multiple lines could be in the same row;
+        if (self.rowMightSeperate && position.x != lastPosition.x) {
+            if (rect.size.height > lastRect.size.height) {
+                if (rect.origin.y < lastPosition.y && lastPosition.y < rect.origin.y + rect.size.height) newRow = NO;
+            } else {
+                if (lastRect.origin.y < position.y && position.y < lastRect.origin.y + lastRect.size.height) newRow = NO;
+            }
+        }
+        if (newRow) rowIndex++;
+        lastRect = rect;
+        lastPosition = position;
+        line.index = lineCurrentIndex;
+        line.row = rowIndex;
         [lines addObject:line];
+        rowCount = rowIndex + 1;
+        lineCurrentIndex++;
+        
+        if (line.containsHighlight) {
+            self.containsHighlight = YES;
+        }
     }
-    self.rowCount = numberOfLines;
+    self.rowCount = rowCount;
     return lines;
 }
 
@@ -116,18 +147,17 @@ typedef struct {
                        lines:(NSMutableArray *)lines
                         path:(CGPathRef)path
 {
-    CFIndex numberOfLines = CFArrayGetCount(ctLines);
     BOOL needTruncation;
     DHTextLine *truncationLine;
-    if (numberOfLines > 0) {
+    if (self.rowCount > 0) {
         if (self.maximumNumberOfRows > 0) {
-            if (numberOfLines > self.maximumNumberOfRows) {
+            if (self.rowCount > self.maximumNumberOfRows) {
                 needTruncation = YES;
-                numberOfLines = self.maximumNumberOfRows;
+                self.rowCount = self.maximumNumberOfRows;
                 do {
                     DHTextLine *line = [lines lastObject];
                     if (!line) break;
-                    if (line.row < numberOfLines) break;
+                    if (line.row < self.rowCount) break;
                     [lines removeLastObject];
                 } while(1);
             }
@@ -245,6 +275,41 @@ typedef struct {
     self.textBoundingSize = size;
 }
 
+- (void) updateRowsGeometry
+{
+    if (self.rowCount > 0) {
+        self.lineRowsEdge = calloc(_rowCount, sizeof(DHRowEdge));
+        self.lineRowsIndex = calloc(_rowCount, sizeof(NSUInteger));
+        NSInteger lastRowIdx = -1;
+        CGFloat lastHead = 0;
+        CGFloat lastFoot = 0;
+        for (NSUInteger i = 0; i < [self.lines count]; i++) {
+            DHTextLine *line = self.lines[i];
+            CGRect rect = line.bounds;
+            if ((NSInteger)line.row != lastRowIdx) {
+                if (lastRowIdx >= 0) {
+                    _lineRowsEdge[lastRowIdx] = (DHRowEdge) {.head = lastHead, .foot = lastFoot};
+                }
+                lastRowIdx = line.row;
+                _lineRowsIndex[lastRowIdx] = i;
+                lastHead = rect.origin.y;
+                lastFoot = lastHead + rect.size.height;
+            } else {
+                lastHead = MAX(lastHead, rect.origin.y);
+                lastFoot = MAX(lastFoot, rect.origin.y + rect.size.height);
+            }
+        }
+        _lineRowsEdge[lastRowIdx] = (DHRowEdge){.head = lastHead, .foot = lastFoot};
+        
+        for (NSUInteger i = 1; i < _rowCount; i++) {
+            DHRowEdge v0 = _lineRowsEdge[i - 1];
+            DHRowEdge v1 = _lineRowsEdge[i];
+            _lineRowsEdge[i - 1].foot = _lineRowsEdge[i - 1].head = (v0.foot + v1.head) * 0.5;
+        }
+    }
+    
+}
+
 #pragma mark - Drawing
 - (void) drawInContext:(CGContextRef)context
                   size:(CGSize)size
@@ -283,9 +348,16 @@ typedef struct {
 {
     if ([self.lines count] == 0) return NSNotFound;
     
+    NSUInteger rowIdx = [self _closestRowIndexForEdge:point.y];
+    if (rowIdx == NSNotFound) return NSNotFound;
+    
+    NSUInteger lineIdx0 = _lineRowsIndex[rowIdx];
+    NSUInteger lineIdx1 = rowIdx = _rowCount - 1 ? [self.lines count] - 1 : _lineRowsIndex[rowIdx + 1] - 1;
+    if (lineIdx0 == lineIdx1) return lineIdx0;
+        
     CGFloat minDistance = CGFLOAT_MAX;
-    NSUInteger minIndex = 0;
-    for (NSUInteger i = 0; i < [self.lines count]; i++) {
+    NSUInteger minIndex = lineIdx0;
+    for (NSUInteger i = lineIdx0; i < lineIdx1; i++) {
         CGRect bounds = self.lines[i].bounds;
         if (bounds.origin.x <= point.x && point.x <= bounds.origin.x + bounds.size.width) return i;
         CGFloat distance;
@@ -812,6 +884,42 @@ typedef struct {
         range = [DHTextRange rangeWithStart:start end:end];
     }
     return range;
+}
+
+- (NSUInteger) _closestRowIndexForEdge:(CGFloat) edge
+{
+    if ([self.lines count] == 0) return NSNotFound;
+    NSUInteger rowIdx = [self _rowIndexForEdge:edge];
+    if (rowIdx == NSNotFound) {
+        if (edge < _lineRowsEdge[0].head) {
+            rowIdx = 0;
+        } else if (edge > _lineRowsEdge[_rowCount - 1].foot) {
+            rowIdx = _rowCount - 1;
+        }
+    }
+    return rowIdx;
+}
+
+- (NSUInteger) _rowIndexForEdge:(CGFloat) edge
+{
+    if ([self.lines count] == 0) return NSNotFound;
+    NSInteger lo = 0, hi = [self.lines count] - 1, mid = 0;
+    NSUInteger rowIdx = NSNotFound;
+    while (lo <= hi) {
+        mid = (lo + hi) / 2;
+        DHRowEdge oneEdge = _lineRowsEdge[mid];
+        if (oneEdge.head <= edge && edge <= oneEdge.foot) {
+            rowIdx = mid;
+            break;
+        }
+        if (edge < oneEdge.head) {
+            if (mid == 0) break;
+            hi = mid - 1;
+        } else {
+            lo = mid + 1;
+        }
+    }
+    return rowIdx;
 }
 
 @end

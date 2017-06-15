@@ -13,6 +13,7 @@
 #import "DHTextBorder.h"
 #import "DHTextDecoration.h"
 #import "DHTextAttribute.h"
+#import "DHTextHighlight.h"
 
 @interface ViewController ()
 
@@ -73,6 +74,19 @@
         NSLog(@"rect = %@", NSStringFromCGRect(rect));
     };
     label.tapAction = tapAction;
+    
+    DHTextBorder *highlightBorder = [DHTextBorder borderWithLineStyle:DHTextLineStyleSingle strokeWidth:2 strokeColor:[UIColor redColor]];
+    highlightBorder.cornerRadius = 5;
+    highlightBorder.strokeWidth = 0;
+    highlightBorder.lineStyle = DHTextLineStyleThick | DHTextLineStylePatternSolid;
+    highlightBorder.insets = UIEdgeInsetsMake(0, -3, 0, -3);
+    highlightBorder.fillColor = [UIColor lightGrayColor];
+    
+    DHTextHighlight *highlight = [DHTextHighlight new];
+    [highlight setColor:[UIColor redColor]];
+    [highlight setBackgroundBorder:highlightBorder];
+    
+    [attrStr setHighlight:highlight forRange:NSMakeRange(3, 5)];
     
     label.backgroundColor = [UIColor yellowColor];
     [self.view addSubview:label];

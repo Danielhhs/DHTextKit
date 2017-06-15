@@ -28,6 +28,8 @@
 @property (nonatomic, readonly) NSRange range;
 @property (nonatomic) NSUInteger index;
 @property (nonatomic) NSUInteger row;
+
+#pragma mark - Geometry
 @property (nonatomic, readonly) CGRect bounds;
 @property (nonatomic, readonly) CGSize size;
 @property (nonatomic, readonly) CGFloat width;
@@ -37,11 +39,14 @@
 @property (nonatomic, readonly) CGFloat top;
 @property (nonatomic, readonly) CGFloat bottom;
 
+#pragma mark - Glyphs
 @property (nonatomic, readonly) CGFloat ascent;
 @property (nonatomic, readonly) CGFloat descent;
 @property (nonatomic, readonly) CGFloat leading;
 @property (nonatomic, readonly) CGFloat lineWidth;
 @property (nonatomic, readonly) CGFloat trailingWhiteSpaceWidth;
+
+@property (nonatomic, readonly) BOOL containsHighlight;
 
 @property (nonatomic, strong, readonly) NSArray <DHTextAttachment *> *attachments;
 @property (nonatomic, strong, readonly) NSArray <NSValue *> *attachmentRanges;  //NSValue wrapping NSRange

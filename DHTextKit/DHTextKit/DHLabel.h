@@ -36,6 +36,10 @@
 
 @property (nonatomic, strong) DHTextAction tapAction;
 @property (nonatomic, strong) DHTextAction longPressAction;
+@property (nonatomic, strong) DHTextAction highlightTapAction;
+@property (nonatomic, strong) DHTextAction highlightLongPressAction;
+
+@property (nonatomic) BOOL fadeOnHighlight;
 
 + (CGRect) textBoundingRectForAttributedString:(NSAttributedString *)attributedString
                                       maxWidth:(CGFloat)width;

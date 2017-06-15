@@ -14,6 +14,7 @@
 #import "DHTextAttachment.h"
 #import "DHTextBorder.h"
 #import "DHTextDecoration.h"
+#import "DHTextHighlight.h"
 
 @interface NSAttributedString (DHText)
 
@@ -58,6 +59,7 @@
 - (void) setBackgroundBorder:(nullable DHTextBorder *)border;
 - (void) setTextUnderline:(nullable DHTextDecoration *)underline;
 - (void) setTextStrikeThrough:(nullable DHTextDecoration *)strikeThrough;
+- (void) setHighlight:(nullable DHTextHighlight *)highlight;
 
 - (void) setFont:(nullable UIFont *)font forRange:(NSRange)range;
 - (void) setKern:(nullable NSNumber *)kern forRange:(NSRange)range;
@@ -78,6 +80,7 @@
 - (void) setBackgroundBorder:(nullable DHTextBorder *)border forRange:(NSRange)range;
 - (void) setTextUnderline:(nullable DHTextDecoration *)underline forRange:(NSRange)range;
 - (void) setTextStrikeThrough:(nullable DHTextDecoration *)strikeThrough forRange:(NSRange)range;
+- (void) setHighlight:(nullable DHTextHighlight *)highlight forRange:(NSRange)range;
 
 
 @end

@@ -17,7 +17,7 @@
 static const CGSize DHTextContainerMaxSize = (CGSize){0x100000, 0x100000};
 
 @interface DHTextLayout : NSObject
-
+@property (nonatomic, strong, readonly, nullable) NSAttributedString *text;
 @property (nonatomic, strong, readonly, nullable) NSArray <DHTextLine *> *lines;
 @property (nonatomic, readonly) CGRect textBoundingRect;
 @property (nonatomic, strong, readonly, nullable) DHTextContainer *container;
@@ -25,6 +25,7 @@ static const CGSize DHTextContainerMaxSize = (CGSize){0x100000, 0x100000};
 @property (nonatomic, readonly) CGSize textBoundingSize;
 @property (nonatomic, readonly, nullable) DHTextLine *truncatedLine;
 @property (nonatomic, readonly) NSUInteger rowCount;
+@property (nonatomic, readonly) BOOL containsHighlight;
 
 #pragma mark - Initializers
 + (nullable DHTextLayout *) layoutWithContainerSize:(CGSize) size

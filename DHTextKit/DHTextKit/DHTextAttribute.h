@@ -65,6 +65,7 @@ UIKIT_EXTERN NSString *_Nonnull const DHTextBorderAttributeName;     //Value sho
 UIKIT_EXTERN NSString *_Nonnull const DHTextBackgroundBorderAttributeName;     //Value should be instance of DHTextBorder
 UIKIT_EXTERN NSString *_Nonnull const DHTextUnderlineAttributeName;             //Value should be instance of DHTextDecoration
 UIKIT_EXTERN NSString *_Nonnull const DHTextStrikeThroughAttributeName;         //Value should be instance of DHTextDecoration
+UIKIT_EXTERN NSString *_Nonnull const DHTextHighlightAttributeName;         //Value should be instance of DHTextHighlight
 
 UIKIT_EXTERN NSString *_Nonnull const DHTextAttachmentToken; ///U+FFFC, used for text attachment.
 UIKIT_EXTERN NSString *_Nonnull const DHTextTruncationToken; ///U+2026, used for text truncation  "…"

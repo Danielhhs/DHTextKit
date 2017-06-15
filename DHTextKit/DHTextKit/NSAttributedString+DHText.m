@@ -336,4 +336,14 @@
     [self setAttribute:DHTextStrikeThroughAttributeName value:strikeThrough range:range];
 }
 
+- (void) setHighlight:(DHTextHighlight *)highlight
+{
+    [self setHighlight:highlight forRange:NSMakeRange(0, [self length])];
+}
+
+- (void) setHighlight:(DHTextHighlight *)highlight forRange:(NSRange)range
+{
+    [self setAttribute:DHTextHighlightAttributeName value:highlight range:range];
+}
+
 @end
