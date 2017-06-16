@@ -354,7 +354,7 @@ typedef struct {
     NSUInteger lineIdx0 = _lineRowsIndex[rowIdx];
     NSUInteger lineIdx1 = rowIdx = _rowCount - 1 ? [self.lines count] - 1 : _lineRowsIndex[rowIdx + 1] - 1;
     if (lineIdx0 == lineIdx1) return lineIdx0;
-        
+    
     CGFloat minDistance = CGFLOAT_MAX;
     NSUInteger minIndex = lineIdx0;
     for (NSUInteger i = lineIdx0; i < lineIdx1; i++) {
